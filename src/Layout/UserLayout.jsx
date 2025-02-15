@@ -6,13 +6,19 @@ import UserHeader from "../components/user/UserHeader";
 import axiosInstance from "../config/axiosInstance";
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser, saveUser } from "../redux/features/userSlice";
+import { useState } from "react";
+import SearchResults from "../components/shared/SearchResults";
 
 const UserLayout = () => {
   const { isUserAuth, userData } = useSelector((state) => state.user);
   console.log(userData);
   const dispatch = useDispatch();
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
   console.log("isUserAuth====", isUserAuth);
 
   const checkUser = async () => {
@@ -21,6 +27,7 @@ const UserLayout = () => {
         method: "GET",
         url: "/user/checkuser",
       });
+      console.log(response);
       dispatch(saveUser());
     } catch (error) {
       dispatch(clearUser());
@@ -34,7 +41,12 @@ const UserLayout = () => {
 
   return (
     <div>
-      {isUserAuth ? <UserHeader /> : <Header />}
+      {isUserAuth ? (
+        <UserHeader onSearch={handleSearch} />
+      ) : (
+        <Header onSearch={handleSearch} />
+      )}
+      {searchQuery && <SearchResults searchQuery={searchQuery} />}
 
       <div className="min-h-96">
         <Outlet />

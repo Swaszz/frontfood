@@ -1,120 +1,166 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import {
+  fetchAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+} from "../../redux/features/DeliverySlice";
+import { fetchCart } from "../../redux/features/CartSlice";
+import {
+  fetchOrderSummary,
+  setOrderDetails,
+} from "../../redux/features/OrderSlice";
 import "react-toastify/dist/ReactToastify.css";
-import axiosInstance from "../../config/axiosInstance";
-import useFetch from "../../hooks/useFetch";
+import { saveSelectedAddress } from "../../Utils/Orderutils";
 
 function DeliveryAddress() {
-  const [addresses, isLoading, error, setAddresses] = useFetch(
-    "/delivery/getdelivery"
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { addresses, isLoading, error } = useSelector(
+    (state) => state.delivery
   );
+  const { order } = useSelector((state) => state.order);
+  const { cart } = useSelector((state) => state.cart);
+
   const [form, setForm] = useState({
-    address: "",
+    street: "",
     city: "",
     state: "",
     zipCode: "",
     country: "",
     isDefault: false,
   });
+
   const [editingId, setEditingId] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("Fetching Cart Data...");
+    dispatch(fetchCart());
+    dispatch(fetchAddresses());
+    dispatch(fetchOrderSummary());
+  }, [dispatch]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prevForm) => ({
+      ...prevForm,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
     try {
-      let response;
       if (editingId) {
-        response = await axiosInstance.put("/delivery/updatedelivery", {
-          addressId: editingId,
-          ...form,
-        });
-        toast.success("Delivery address updated successfully!");
+        await dispatch(updateAddress({ addressId: editingId, form })).unwrap();
+        toast.success("Address updated successfully!");
       } else {
-        response = await axiosInstance.post("/delivery/adddelivery", form);
-        toast.success("Delivery address added successfully!");
+        await dispatch(addAddress(form)).unwrap();
+        toast.success("Address added successfully!");
       }
 
-      const updatedAddresses = editingId
-        ? addresses.map((addr) =>
-            addr._id === editingId ? response.data.data : addr
-          )
-        : [...addresses, response.data.data];
-      setAddresses(updatedAddresses);
-
-      setEditingId(null);
       setForm({
-        address: "",
+        street: "",
         city: "",
         state: "",
         zipCode: "",
         country: "",
         isDefault: false,
       });
+      setEditingId(null);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error saving address");
+      toast.error(error || "Error saving address");
     }
   };
 
   const handleDelete = async (addressId) => {
     try {
-      await axiosInstance.delete(`/delivery/deletedelivery/${addressId}`);
-      toast.success("Delivery address deleted successfully!");
-
-      setAddresses(addresses.filter((addr) => addr._id !== addressId));
-
-      if (selectedAddress && selectedAddress._id === addressId) {
-        setSelectedAddress(null);
-      }
+      await dispatch(deleteAddress(addressId)).unwrap();
+      toast.success("Address deleted successfully!");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error deleting address");
+      toast.error(error || "Error deleting address");
     }
   };
 
   const handleEdit = (address) => {
     setEditingId(address._id);
-    setForm(address);
+    setForm({ ...address });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setForm({
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "",
+      isDefault: false,
+    });
   };
 
   const handleSelectAddress = (address) => {
     setSelectedAddress(address);
   };
 
-  const handlePlaceOrder = () => {
+  const handleDeliverToThisAddress = () => {
+    console.log("Checking Cart Data Before Navigation:", cart);
+    console.log("Checking Order State Before Navigation:", order);
+
     if (!selectedAddress) {
-      toast.error("Please select a delivery address before placing an order.");
+      toast.error("Please select a delivery address.");
       return;
     }
-    navigate("/user/order", { state: { selectedAddress } });
+
+    if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
+      console.error("No items found in cart:", cart);
+      toast.error("No items in the cart to proceed.");
+      return;
+    }
+
+    dispatch(
+      setOrderDetails({
+        deliveryAddress: selectedAddress,
+        orderItems: cart.cartItems,
+        totalAmount: cart.totalAmount,
+        discountAmount: cart.discountAmount,
+        appliedCoupon: cart.appliedCoupon,
+      })
+    );
+
+    saveSelectedAddress(selectedAddress);
+
+    console.log(" Navigating to Order Page...");
+    navigate("/user/order");
   };
-
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4"> Delivery Addresses</h1>
-
+    <div className="container mx-auto max-w-4xl p-6">
       <ToastContainer />
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        Delivery Addresses
+      </h1>
 
       <form
         onSubmit={handleSaveAddress}
-        className="bg-gray-100 p-4 rounded-md shadow-md"
+        className="bg-white p-6 rounded-lg shadow-lg"
       >
-        <h2 className="text-xl font-semibold mb-3">
+        <h2 className="text-xl font-semibold mb-4">
           {editingId ? "Edit Address" : "Add New Address"}
         </h2>
-        <div className="grid grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            name="address"
-            placeholder="Address"
-            value={form.address}
+            name="street"
+            placeholder="Street Address"
+            value={form.street}
             onChange={handleChange}
             required
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg w-full"
           />
           <input
             type="text"
@@ -123,7 +169,7 @@ function DeliveryAddress() {
             value={form.city}
             onChange={handleChange}
             required
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg w-full"
           />
           <input
             type="text"
@@ -132,7 +178,7 @@ function DeliveryAddress() {
             value={form.state}
             onChange={handleChange}
             required
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg w-full"
           />
           <input
             type="text"
@@ -141,7 +187,7 @@ function DeliveryAddress() {
             value={form.zipCode}
             onChange={handleChange}
             required
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg w-full"
           />
           <input
             type="text"
@@ -150,83 +196,96 @@ function DeliveryAddress() {
             value={form.country}
             onChange={handleChange}
             required
-            className="p-2 border rounded"
+            className="p-3 border rounded-lg w-full"
           />
         </div>
-        <label className="flex items-center mt-2">
-          <input
-            type="checkbox"
-            name="isDefault"
-            checked={form.isDefault}
-            onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
-          />
-          <span className="ml-2">Set as Default</span>
-        </label>
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded mt-3 w-full"
-        >
-          {editingId ? "Update Address" : "Add Address"}
-        </button>
+
+        <div className="flex gap-4 mt-4">
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full transition"
+          >
+            {editingId ? "Update Address" : "Add Address"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md w-full transition"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
-      {isLoading && <p>Loading addresses...</p>}
-      {error && <p className="text-red-500">Error fetching addresses</p>}
-
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">Saved Addresses</h2>
-        {addresses?.length === 0 ? (
-          <p>No addresses found.</p>
-        ) : (
-          addresses?.map((addr) => (
-            <div
-              key={addr._id}
-              className={`bg-white p-4 rounded-md shadow-md mt-3 flex justify-between items-center ${
-                selectedAddress && selectedAddress._id === addr._id
-                  ? "border-2 border-blue-500"
-                  : ""
-              }`}
-              onClick={() => handleSelectAddress(addr)}
-            >
-              <div>
-                <p className="font-semibold">
-                  {addr.address}, {addr.city}, {addr.state} - {addr.zipCode},{" "}
-                  {addr.country}
-                </p>
-                {addr.isDefault && (
-                  <span className="text-green-600 font-bold">[Default]</span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit(addr);
-                  }}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded"
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : (
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Saved Addresses
+          </h2>
+          {addresses.length === 0 ? (
+            <p className="text-center text-gray-500">No addresses found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {addresses.map((addr) => (
+                <div
+                  key={addr._id}
+                  className={`bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer ${
+                    selectedAddress?._id === addr._id
+                      ? "border-2 border-blue-500"
+                      : ""
+                  }`}
+                  onClick={() => handleSelectAddress(addr)}
                 >
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(addr._id);
-                  }}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
-              </div>
+                  <p className="font-semibold text-gray-700">
+                    {addr.street && `${addr.street}, `}
+                    {addr.city && `${addr.city}, `}
+                    {addr.state && `${addr.state} - `}
+                    {addr.zipCode && `${addr.zipCode}, `}
+                    {addr.country}
+                  </p>
+                  {addr.isDefault && (
+                    <span className="text-green-600 font-bold text-sm">
+                      [Default]
+                    </span>
+                  )}
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(addr);
+                      }}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(addr._id);
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <button
-        onClick={handlePlaceOrder}
-        className="bg-green-600 text-white px-6 py-2 rounded mt-6 w-full"
+        onClick={handleDeliverToThisAddress}
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md mt-6 w-full transition"
       >
-        Place Order
+        Deliver to this Address
       </button>
     </div>
   );

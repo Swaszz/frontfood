@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DarkMode from "../shared/Darkmode";
 
-function OwnerHeader() {
-  const [query, setQuery] = useState("");
+function Headerowner() {
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && query.trim()) {
@@ -50,16 +50,10 @@ function OwnerHeader() {
             <li>
               <Link to={"/restaurantowner/signup"}>SIGNUP</Link>
             </li>
-            <li>
-              <Link to={"/restaurantowner/addrestaurant"}>MENU</Link>
-            </li>
-            <li>
-              <Link to={"/restaurantowner/createcoupon"}>COUPON</Link>
-            </li>
           </ul>
         </div>
 
-        <DarkMode className="w-6 h-6" />
+        <DarkMode className="w-5 h-5" />
       </div>
 
       <div className="navbar-center">
@@ -126,21 +120,9 @@ function OwnerHeader() {
             </svg>
           </button>
         </div>
-
-        <button
-          className="btn btn-ghost btn-circle avatar"
-          onClick={() => navigate("/restaurantowner/profile")}
-        >
-          <div className="w-10 rounded-full">
-            <img
-              alt="Profile"
-              src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-            />
-          </div>
-        </button>
       </div>
     </div>
   );
 }
 
-export default OwnerHeader;
+export default Headerowner;

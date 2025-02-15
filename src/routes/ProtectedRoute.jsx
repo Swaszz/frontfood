@@ -2,24 +2,39 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-function ProtectedRoute() {
+function ProtectedRoute({ role, children }) {
   const navigate = useNavigate();
+
   const isUserAuth = useSelector((state) => state.user.isUserAuth);
+  const isOwnerAuth = useSelector((state) => state.owner.isOwnerAuth);
+  const isAdminAuth = useSelector((state) => state.admin.isAdminAuth);
+
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
-    if (isUserAuth === false) {
-      navigate("/login");
+    const isAuthenticated =
+      (role === "user" && isUserAuth) ||
+      (role === "restaurantowner" && isOwnerAuth) ||
+      (role === "admin" && isAdminAuth);
+
+    console.log(`Checking authentication for role: ${role}`);
+    console.log(
+      `User Auth: ${isUserAuth}, Owner Auth: ${isOwnerAuth}, Admin Auth: ${isAdminAuth}`
+    );
+
+    if (!isAuthenticated) {
+      console.log(`Unauthorized - Redirecting to /${role}/login`);
+      navigate(`/${role}/login`);
     } else {
       setIsChecked(true);
     }
-  }, [isUserAuth, navigate]);
+  }, [role, isUserAuth, isOwnerAuth, isAdminAuth, navigate]);
 
   if (!isChecked) {
     return <div>Loading...</div>;
   }
 
-  return <Outlet />;
+  return children ? children : <Outlet />;
 }
 
 export default ProtectedRoute;

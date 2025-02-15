@@ -1,17 +1,28 @@
 import { createBrowserRouter } from "react-router-dom";
 import UserLayout from "../Layout/UserLayout";
 import Home from "../pages/user/Home";
-import Signup from "../pages/shared/Signup";
-import Login from "../pages/shared/Login";
 import About from "../pages/user/About";
+import Profile from "../pages/user/Profile";
 import Menuitem from "../pages/user/Menuitem";
 import MenuitemDetails from "../pages/user/MenuitemDetails";
-import ErrorPage from "../pages/shared/ErrorPage";
-import OwnerLayout from "../Layout/OwnerLayout";
-import Profile from "../pages/user/Profile";
 import ProtectedRoute from "./ProtectedRoute";
 import Cart from "../pages/user/Cart";
 import DeliveryAddress from "../pages/user/DeliveryAddress";
+import Order from "../pages/user/Order";
+import Orderhistory from "../pages/user/Orderhistory";
+import Productitem from "../pages/user/Productitem";
+import Signup from "../pages/shared/Signup";
+import Login from "../pages/shared/Login";
+import ErrorPage from "../pages/shared/ErrorPage";
+import OwnerLayout from "../Layout/OwnerLayout";
+import Profiles from "../pages/restaurantowner/Profiles";
+import Ownerhome from "../pages/restaurantowner/Ownerhome";
+import ScrollToTop from "../components/ScrollToTop";
+import { Outlet } from "react-router-dom";
+import Menuitemform from "../pages/restaurantowner/Menuitemform";
+import Restaurantform from "../pages/restaurantowner/RestaurantForm";
+import Couponform from "../pages/restaurantowner/Couponform";
+<ScrollToTop />;
 const router = createBrowserRouter([
   {
     path: "",
@@ -23,16 +34,16 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
+        path: "search/:query",
+        element: <Productitem />,
+      },
+      {
         path: "signup",
         element: <Signup />,
       },
       {
         path: "login",
         element: <Login />,
-      },
-      {
-        path: "about",
-        element: <About />,
       },
       {
         path: "about",
@@ -48,13 +59,13 @@ const router = createBrowserRouter([
         element: <MenuitemDetails />,
       },
       {
-        element: <ProtectedRoute />,
+        element: (
+          <ProtectedRoute role="user">
+            <Outlet />
+          </ProtectedRoute>
+        ),
         path: "user",
         children: [
-          {
-            path: "whishlist",
-            // element: <h1>Wishlist</h1>,
-          },
           {
             path: "profile",
             element: <Profile />,
@@ -68,8 +79,12 @@ const router = createBrowserRouter([
             element: <DeliveryAddress />,
           },
           {
-            path: "orders",
-            //element: <h1> orders page</h1>,
+            path: "order",
+            element: <Order />,
+          },
+          {
+            path: "history",
+            element: <Orderhistory />,
           },
           {
             path: "payment/success",
@@ -85,6 +100,14 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage role="restaurantowner" />,
     children: [
       {
+        path: "",
+        element: <Ownerhome />,
+      },
+      {
+        path: "search/:query",
+        //  element: <Productitem />,
+      },
+      {
         path: "login",
         element: <Login role="restaurantowner" />,
       },
@@ -92,20 +115,58 @@ const router = createBrowserRouter([
         path: "signup",
         element: <Signup role="restaurantowner" />,
       },
-    ],
-  },
-  {
-    path: "admin",
-    element: <OwnerLayout />,
-    errorElement: <ErrorPage role="admin" />,
-    children: [
       {
-        path: "login",
-        element: <Login role="admin" />,
+        path: "about",
+        element: <About />,
       },
       {
-        path: "signup",
-        element: <Signup role="admin" />,
+        path: "profile",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <Profiles />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "addrestaurant",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <Restaurantform />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "createmenu",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <Menuitemform />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "createcoupon",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <Couponform />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+
+  {
+    path: "admin",
+
+    errorElement: <ErrorPage role="admin" />,
+    children: [
+      { path: "login", element: <Login role="admin" /> },
+      { path: "signup", element: <Signup role="admin" /> },
+      {
+        element: <ProtectedRoute role="admin" />,
+        children: [
+          { path: "dashboard", element: <h1>Admin Dashboard</h1> },
+          { path: "manage-restaurants", element: <h1>Manage Restaurants</h1> },
+        ],
       },
     ],
   },

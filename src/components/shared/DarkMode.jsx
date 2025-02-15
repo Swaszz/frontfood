@@ -10,7 +10,6 @@ function DarkMode() {
 
   return (
     <label className="swap swap-rotate">
-      {/* this hidden checkbox controls the state */}
       <input type="checkbox" onClick={() => setIsDarkMode(!isDarkMode)} />
       {/* SUN icon */}
       <svg

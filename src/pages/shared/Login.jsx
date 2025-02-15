@@ -4,7 +4,8 @@ import axiosInstance from "../../config/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearUser, saveUser } from "../../redux/features/userSlice";
-import toast from "react-hot-toast";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = ({ role }) => {
   const { register, handleSubmit } = useForm();
@@ -18,83 +19,85 @@ const Login = ({ role }) => {
     signupRoute: "/signup",
   };
 
-  if (role == "mentor") {
-    user.role = "mentor";
-    user.loginAPI = "/mentor/login";
-    (user.profileRoute = "/mentor/profile"),
-      (user.signupRoute = "/mentor/signup");
+  if (role === "restaurantowner") {
+    user.role = "restaurantowner";
+    user.loginAPI = "/restaurantowner/login";
+    user.profileRoute = "/restaurantowner/profile";
+    user.signupRoute = "/restaurantowner/signup";
   }
 
   const onSubmit = async (data) => {
     try {
-      const response = await axiosInstance({
-        method: "PUT",
-        url: user.loginAPI,
-        data: data,
-      });
-      console.log("response====", response);
+      const response = await axiosInstance.put(user.loginAPI, data);
+      localStorage.setItem("token", response.data.token);
       dispatch(saveUser(response?.data?.data));
-      toast.success("Login success");
-      navigate(user.profileRoute);
+
+      toast.success("Login Successful! Redirecting...", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+
+      setTimeout(() => navigate(user.profileRoute), 2500);
     } catch (error) {
-      dispatch(clearUser());
-      toast.error("Login Failed");
       console.log(error);
+      dispatch(clearUser());
+      toast.error("Login Failed! Please check your credentials.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
     }
   };
 
   return (
-    <div className="hero bg-base-200 min-h-screen">
-      <div className="text-center lg">
-        <h1 className="logintitle text-5xl font-bold">
-          Login now! {user.role}{" "}
-        </h1>
+    <div className="hero min-h-screen bg-base-200 flex justify-center items-center">
+      <ToastContainer />
 
-        <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-          <form className="card-body" onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                placeholder="email"
-                {...register("email")}
-                className="input input-bordered"
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Password</span>
-              </label>
-              <input
-                type="password"
-                placeholder="password"
-                {...register("password")}
-                className="input input-bordered"
-                required
-              />
-              <div className="flex items-center justify-between">
-                <label className="label">
-                  <a href="#" className="label-text-alt link link-hover">
-                    Forgot password?
-                  </a>
-                </label>
-                <label className="label">
-                  <Link to={user.signupRoute}>
-                    <a href="#" className="label-text-alt link link-hover">
-                      New User?
-                    </a>
-                  </Link>
-                </label>
-              </div>
-            </div>
-            <div className="form-control mt-6">
-              <button className="btn btn-primary">Login</button>
-            </div>
-          </form>
-        </div>
+      <div className="w-full max-w-md bg-base-100 shadow-lg rounded-lg p-8">
+        <h1 className="text-4xl font-bold text-center mb-6">Login Now!</h1>
+
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Email</span>
+            </label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              {...register("email")}
+              className="input input-bordered w-full"
+              required
+            />
+          </div>
+
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Password</span>
+            </label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              {...register("password")}
+              className="input input-bordered w-full"
+              required
+            />
+          </div>
+
+          <div className="flex justify-between text-sm">
+            <a href="#" className="label-text-alt link link-hover">
+              Forgot password?
+            </a>
+            <Link
+              to={user.signupRoute}
+              className="label-text-alt link link-hover"
+            >
+              New User? Signup
+            </Link>
+          </div>
+
+          <div className="form-control mt-4">
+            <button className="btn btn-primary w-full">Login</button>
+          </div>
+        </form>
       </div>
     </div>
   );

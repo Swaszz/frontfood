@@ -1,226 +1,212 @@
-import { useSelector, useDispatch } from "react-redux";
-import {
-  setCartDetails,
-  updateQuantity,
-  removeFromCart,
-  clearCart,
-  setCart,
-} from "../../redux/features/CartSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axiosInstance";
+import {
+  setCart,
+  updateItemQuantity,
+  removeItemFromCart,
+  clearCart,
+  applyCoupon,
+  proceedToCheckout,
+} from "../../redux/features/CartSlice";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-function Cart() {
-  const { cartItems, totalAmount, totalQuantity, cartId } = useSelector(
-    (state) => state.cart
-  );
-  console.log("Redux Cart State:", { cartId, cartItems });
-  console.log(
-    "Redux Cart State:",
-    useSelector((state) => state.cart)
-  );
+const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { cart } = useSelector((state) => state.cart);
+  const [couponCode, setCouponCode] = useState("");
 
   useEffect(() => {
-    const fetchCartDetails = async () => {
+    const fetchCartData = async () => {
       try {
-        const response = await axiosInstance.get("/cart");
-
-        if (response.data.cartId) {
-          dispatch(setCart(response.data));
-          console.log("Cart ID stored in Redux:", response.data.cartId);
-        } else {
-          console.error("API did not return cartId.");
-        }
+        const response = await axiosInstance.get("/cart/getcart");
+        dispatch(setCart(response.data.data));
       } catch (error) {
-        console.error("Error fetching cart details:", error);
+        console.error("Error fetching cart:", error);
       }
     };
-
-    fetchCartDetails();
+    fetchCartData();
   }, [dispatch]);
 
-  const handleUpdateQuantity = async (_id, newQuantity) => {
-    if (!cartId) {
-      console.error("cartId is missing! Redux state is incorrect.");
-      return;
-    }
-
-    const menuItem = cartItems.find((item) => item._id === _id);
-    if (!menuItem) {
-      console.error(`menuItem not found in cart for _id: ${_id}!`);
-      return;
-    }
-
-    if (!menuItem.menuItemId) {
-      console.error("menuItemId is missing in cart data!");
-      return;
-    }
-
-    dispatch(
-      updateQuantity({
-        _id,
-        menuItemId: String(menuItem.menuItemId),
-        quantity: newQuantity,
-      })
-    );
-
-    if (newQuantity < 1) {
-      dispatch(removeFromCart(_id));
-      return;
-    }
-
+  const handleUpdateQuantity = async (menuItemId, newQuantity) => {
+    if (newQuantity < 1) return;
     try {
+      console.log("Updating Quantity for:", { menuItemId, newQuantity });
+
       const response = await axiosInstance.put("/cart/updatequantity", {
-        cartId,
-        menuItemId: String(menuItem.menuItemId),
+        cartId: cart.cartId,
+        menuItemId,
         quantity: newQuantity,
       });
 
-      console.log("Updated Cart:", response.data);
+      console.log("API Response:", response.data);
 
-      dispatch(setCart(response.data.data));
+      dispatch(updateItemQuantity({ menuItemId, quantity: newQuantity }));
+
+      const updatedCartResponse = await axiosInstance.get("/cart/getcart");
+      dispatch(setCart(updatedCartResponse.data.data));
     } catch (error) {
       console.error(
         "Error updating quantity:",
-        error.response?.data?.message || error.message
+        error.response?.data || error.message
       );
     }
   };
-  useEffect(() => {
-    console.log("Redux Cart State Updated:", cartItems);
-    cartItems.forEach((item) => {
-      console.log(
-        `Item _id: ${item._id}, name: ${item.name}, price: ${item.price}, image: ${item.image}`
-      );
-    });
-  }, [cartItems]);
-  const handleRemoveFromCart = async (itemId) => {
-    try {
-      console.log("Removing item from cart:", itemId);
 
-      const response = await axiosInstance.delete("/cart/deletecart", {
-        data: { menuItemId: itemId },
+  const handleRemoveItem = async (menuItemId) => {
+    try {
+      await axiosInstance.delete("/cart/deletecart", { data: { menuItemId } });
+      dispatch(removeItemFromCart(menuItemId));
+    } catch (error) {
+      console.error("Error removing item from cart:", error);
+    }
+  };
+
+  const handleClearCart = async () => {
+    try {
+      console.log("Clearing Cart...");
+
+      await axiosInstance.delete("/cart/emptycart", {
+        data: { cartId: cart.cartId },
       });
 
-      const updatedCart = await axiosInstance.get("/cart");
-
-      dispatch(setCartDetails(updatedCart.data));
+      dispatch(clearCart());
     } catch (error) {
-      console.error(
-        "Error removing item:",
-        error.response?.data?.message || error.message
-      );
+      console.error("Error clearing cart:", error);
+      toast.error("Failed to clear cart. Please try again!");
     }
   };
 
-  const handleCheckout = async () => {
+  const handleApplyCoupon = async () => {
     try {
-      if (!cartId) {
-        console.error(" Error: cartId is undefined in Redux.");
+      console.log("Attempting to Apply Coupon:", couponCode);
+
+      if (!couponCode) {
         return;
       }
 
-      const response = await axiosInstance.post("/cart/checkout", {
-        cartId,
+      if (cart.appliedCoupon) {
+        toast.error(" A coupon is already applied. Remove it first!");
+        return;
+      }
+
+      const response = await axiosInstance.post("/coupon/apply", {
+        cartId: cart.cartId,
+        couponCode,
       });
 
-      console.log("Checkout API Response:", response.data);
+      console.log("Coupon Applied Successfully:", response.data);
 
-      if (response.status === 200) {
-        navigate("/user/delivery");
-      } else {
-        console.log("Error during checkout. Please try again.");
-      }
+      dispatch(setCart(response.data.cart));
     } catch (error) {
-      console.error("Checkout Error:", error);
+      console.error("Error applying coupon:", error);
+      toast.error("Error applying coupon!");
     }
   };
 
+  const handleProceedToCheckout = async () => {
+    try {
+      await axiosInstance.post("/cart/checkout", { cartId: cart.cartId });
+      dispatch(proceedToCheckout());
+      navigate("/user/delivery");
+    } catch (error) {
+      console.error("Error proceeding to checkout:", error);
+    }
+  };
+  if (!cart || !cart.cartItems) {
+    return <p>Your cart is empty.</p>;
+  }
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">🛒 Shopping Cart</h1>
+      <h2 className="text-2xl font-bold mb-4">🛒 Shopping Cart</h2>
 
-      {cartItems.length === 0 ? (
-        <p className="text-gray-500">Your cart is empty.</p>
-      ) : (
+      {cart.cartItems.length > 0 ? (
         <>
-          {cartItems.map((item) => (
-            <div
-              key={item._id}
-              className="flex items-center justify-between p-4 border-b"
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={item.image ? item.image : "/placeholder.jpg"}
-                  alt={item.name ? item.name : "No name"}
-                  className="w-16 h-16 object-cover"
-                />
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    {item.name ? item.name : "Unnamed Item"}
-                  </h2>
-                  <p className="text-gray-600">
-                    ${item.price ? item.price.toFixed(2) : "0.00"}
-                  </p>
+          {cart.cartItems.map((item) => (
+            <div key={item._id} className="flex items-center border p-4 mb-2">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-20 h-20 object-cover"
+              />
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg">{item.name}</h3>
+                <p className="text-gray-500">${item.price.toFixed(2)}</p>
+
+                <div className="flex mt-2">
+                  <button
+                    onClick={() =>
+                      handleUpdateQuantity(item._id, item.quantity - 1)
+                    }
+                    className="px-2 py-1 bg-gray-300 rounded"
+                  >
+                    -
+                  </button>
+                  <span className="px-4">{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      handleUpdateQuantity(item._id, item.quantity + 1)
+                    }
+                    className="px-2 py-1 bg-gray-300 rounded"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    console.log("➖ Decrease clicked for _id:", item._id);
-                    handleUpdateQuantity(item._id, item.quantity - 1);
-                  }}
-                  disabled={item.quantity <= 1} // Prevents quantity from going below 1
-                >
-                  ➖
-                </button>
 
-                <span className="text-lg font-bold mx-4">{item.quantity}</span>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    handleUpdateQuantity(item._id, item.quantity + 1);
-                  }}
-                >
-                  ➕
-                </button>
-                <button
-                  className="btn btn-danger ml-4"
-                  onClick={() => handleRemoveFromCart(item._id)}
-                >
-                  Remove ❌
-                </button>
-              </div>
+              <button
+                onClick={() => handleRemoveItem(item._id)}
+                className="ml-4 bg-red-500 text-white px-3 py-1 rounded"
+              >
+                ❌ Remove
+              </button>
             </div>
           ))}
 
-          <div className="mt-6">
-            <p className="text-xl font-bold">Total Items: {totalQuantity}</p>
-            <p className="text-xl font-bold">
-              Total Amount: ${totalAmount ? totalAmount.toFixed(2) : "0.00"}
-            </p>
+          <h3 className="text-xl font-bold mt-4">
+            💰 Total: ${cart.totalAmount.toFixed(2)}
+          </h3>
+
+          <div className="mt-4 flex">
+            <input
+              type="text"
+              placeholder="Enter coupon code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="border p-2 flex-1 rounded"
+            />
             <button
-              className="btn btn-danger mt-4"
-              onClick={() => dispatch(clearCart())}
+              onClick={handleApplyCoupon}
+              className="ml-2 bg-green-500 text-white px-3 py-2 rounded"
             >
-              Clear Cart 🗑️
+              ✅ Apply Coupon
             </button>
+          </div>
+
+          <div className="flex justify-between mt-4">
             <button
-              className="btn btn-primary mt-4 w-full sm:w-auto px-6 py-3 text-lg font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-              onClick={handleCheckout}
-              disabled={cartItems.length === 0}
+              onClick={handleClearCart}
+              className="bg-red-600 text-white px-4 py-2 rounded shadow-md hover:bg-red-700 transition duration-300"
             >
-              Proceed to Checkout 🛍️
+              🗑️ Clear Cart
+            </button>
+
+            <button
+              onClick={handleProceedToCheckout}
+              className="bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-700 transition duration-300"
+            >
+              🛍️ Proceed to Checkout
             </button>
           </div>
         </>
+      ) : (
+        <p className="text-center text-gray-600">Your cart is empty. 🛒</p>
       )}
     </div>
   );
-}
+};
 
 export default Cart;

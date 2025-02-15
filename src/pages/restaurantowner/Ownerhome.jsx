@@ -2,7 +2,7 @@ import "react";
 import Carrousel from "../../components/user/Carrousel";
 import Categorymenu from "../../components/user/Categorymenu";
 
-function Home() {
+function Ownerhome() {
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-2">
       <section>
@@ -41,4 +41,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Ownerhome;

@@ -5,10 +5,10 @@ import { clearUser } from "../../redux/features/userSlice";
 import axiosInstance from "../../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
-function Profile() {
+function Profiles() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [profileData, setProfileData] = useFetch("/user/profile");
+  const [profileData, setProfileData] = useFetch("/restaurantowner/profile");
   const [formData, setFormData] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [Error, setError] = useState("");
@@ -27,6 +27,41 @@ function Profile() {
     }
   }, [profileData]);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        const response = await axiosInstance.get("/restaurantowner/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("✅ Profile Data Fetched:", response.data);
+        setProfileData(response.data.data);
+      } catch (err) {
+        console.error("❌ Error Fetching Profile:", err);
+        setError(err.response?.data?.message || "Failed to fetch profile");
+
+        if (err.response?.status === 401) {
+          console.log("❌ Unauthorized: Redirecting to login");
+          localStorage.removeItem("token");
+          dispatch(clearUser());
+          navigate("/restaurantowner/login");
+        }
+      }
+
+      setLoading(false);
+    };
+  });
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -35,7 +70,10 @@ function Profile() {
     setLoading(true);
     setError("");
     try {
-      const response = await axiosInstance.put("/user/updateprofile", formData);
+      const response = await axiosInstance.put(
+        "/restaurantowner/updateprofile",
+        formData
+      );
       if (response.status === 200) {
         setProfileData(response.data.data);
         setFormData(response.data.data);
@@ -49,19 +87,19 @@ function Profile() {
 
   const handleLogOut = async () => {
     try {
-      const response = await axiosInstance.get("/user/logout");
+      const response = await axiosInstance.get("/restaurantowner/logout");
       if (response.status === 200) {
         localStorage.removeItem("token");
         dispatch(clearUser());
+
         setTimeout(() => {
-          navigate("/login", { replace: true });
+          navigate("/restaurantowner/login", { replace: true }); // ✅ Corrected Navigation
         }, 200);
       }
     } catch (error) {
-      console.error("Logout failed:", error.response?.data || error.message);
+      console.error("❌ Logout failed:", error.response?.data || error.message);
     }
   };
-
   return (
     <div>
       <div>
@@ -167,4 +205,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default Profiles;

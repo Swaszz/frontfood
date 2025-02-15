@@ -1,112 +1,121 @@
 import "react";
 import useFetch from "../../hooks/useFetch";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import MenuSkelton from "../../components/shared/Skelton";
 import { useDispatch } from "react-redux";
-import { setCartDetails } from "../../redux/features/CartSlice";
+import { addItemToCart, setCart } from "../../redux/features/CartSlice";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
 import axiosInstance from "../../config/axiosInstance";
+
 function MenuitemDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { restaurantId } = useParams();
-  console.log("Restaurant ID:", restaurantId);
-
   const [MenuItemDetails, isLoading] = useFetch(
     `/menuitem/getmenudetails/${id}`
   );
 
   useEffect(() => {
     console.log("MenuItemDetails:", MenuItemDetails || "No Data");
-    console.log("isLoading:", isLoading);
-  }, [MenuItemDetails, isLoading]);
+  }, [MenuItemDetails]);
 
   const handleAddToCart = async (menuItemId, quantity) => {
     if (!menuItemId) {
-      console.error(" Error: MenuItem ID is undefined!");
+      console.error("Error: MenuItem ID is undefined!");
       return;
     }
 
     try {
-      console.log("Adding item to cart:", { menuItemId, quantity });
+      console.log("Attempting to add item to cart:", {
+        menuItemId,
+        quantity,
+      });
 
       const response = await axiosInstance.post("/cart/addcart", {
         menuItemId,
         quantity: Number(quantity),
       });
 
-      console.log("✅ Cart updated successfully:", response.data);
+      console.log("API Response:", response);
 
-      if (!response.data.cartItems) {
-        console.error("ERROR: cartItems missing in response:", response.data);
-        throw new Error("Invalid response: cart data is missing");
+      if (response.data && response.data.data) {
+        dispatch(setCart(response.data.data));
+        dispatch(addItemToCart(response.data.data));
+
+        console.log("Item added to cart:", response.data.data);
+
+        const updatedCartResponse = await axiosInstance.get("/cart/getcart");
+
+        if (updatedCartResponse.data && updatedCartResponse.data.data) {
+          dispatch(setCart(updatedCartResponse.data.data));
+        } else {
+          console.error(
+            "Error: Cart response is undefined or incorrect structure:",
+            updatedCartResponse
+          );
+        }
+
+        navigate("/user/cart");
+      } else {
+        console.error(
+          " API Response does not contain expected data:",
+          response
+        );
       }
-
-      const updatedCartResponse = await axiosInstance.get("/cart");
-
-      dispatch(setCartDetails(updatedCartResponse.data));
-
-      navigate("/user/cart");
     } catch (error) {
       console.error(
-        "Error adding to cart:",
+        " Error adding item to cart:",
         error?.response?.data || error.message
       );
-      console.log("Error adding to cart! Check console for details.");
     }
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-base-200 flex items-center justify-center px-4 py-10">
       {isLoading ? (
         <MenuSkelton />
       ) : (
-        <div>
-          <section>
-            <h1 className="text-3xl font-bold text-center text-primary mb-6">
-              MenuItem Details
-            </h1>
-          </section>
+        <div className="max-w-5xl w-full bg-base-100 rounded-lg shadow-lg overflow-hidden">
+          <h1 className="text-3xl font-bold text-center text-primary py-6">
+            Menu Item Details
+          </h1>
 
-          <section className="menu-item-container">
-            <figure>
+          <div className="flex flex-col lg:flex-row items-center gap-8 p-6">
+            <div className="w-full lg:w-1/2">
               <img
-                className="card-images"
                 src={MenuItemDetails?.image}
-                alt="Shoes"
+                alt={MenuItemDetails?.name}
+                className="w-full h-80 object-cover rounded-lg shadow-md"
               />
-            </figure>
-
-            <div className="card-body">
-              <h2 className="card-title">{MenuItemDetails?.name}</h2>
-              <p className="description">{MenuItemDetails?.description}</p>
-              <p className="card-price">{MenuItemDetails?.price}</p>
-              <p className="card-category">{MenuItemDetails?.category}</p>
-              <p className="card-restaurant">
-                Restaurant: {MenuItemDetails?.restaurantId?.name || "Unknown"}
-              </p>
-              <p className="card-rating">
-                Restaurant Rating: {MenuItemDetails?.restaurantRating}
-              </p>
-              <div className="card-actions justify-end">
-                <button
-                  className="btn btn-primary mt-2 w-full"
-                  onClick={() => {
-                    if (MenuItemDetails?._id) {
-                      handleAddToCart(MenuItemDetails._id, 1);
-                    } else {
-                      console.error("Error: MenuItem ID is undefined");
-                    }
-                  }}
-                  disabled={isLoading || !MenuItemDetails?._id}
-                >
-                  {isLoading ? "Loading..." : "Add to Cart "}
-                </button>
-              </div>
             </div>
-          </section>
+
+            <div className="w-full lg:w-1/2 space-y-4">
+              <h2 className="text-2xl font-bold text-black-800">
+                {MenuItemDetails?.name}
+              </h2>
+              <p className="text-black-600">{MenuItemDetails?.description}</p>
+              <p className="text-lg font-semibold text-primary">
+                ${MenuItemDetails?.price}
+              </p>
+              <p className="text-black-700">
+                Category: {MenuItemDetails?.category}
+              </p>
+              <p className="text-black-700">
+                Restaurant: {MenuItemDetails?.restaurantName || "Unknown"}
+              </p>
+              <p className="text-black-700">
+                Rating: {MenuItemDetails?.restaurantRating || "N/A"}
+              </p>
+
+              <button
+                className="btn btn-primary w-full mt-4"
+                onClick={() => handleAddToCart(MenuItemDetails?._id, 1)}
+                disabled={isLoading || !MenuItemDetails?._id}
+              >
+                {isLoading ? "Loading..." : "Add to Cart"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
