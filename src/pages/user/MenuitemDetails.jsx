@@ -101,7 +101,7 @@ function MenuitemDetails() {
                 Category: {MenuItemDetails?.category}
               </p>
               <p className="text-black-700">
-                Restaurant: {MenuItemDetails?.restaurantName || "Unknown"}
+                Restaurant: {MenuItemDetails?.restaurantId?.name || "Unknown"}
               </p>
               <p className="text-black-700">
                 Rating: {MenuItemDetails?.restaurantRating || "N/A"}

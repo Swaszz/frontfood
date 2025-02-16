@@ -5,7 +5,9 @@ import { useSelector } from "react-redux";
 function ProtectedRoute({ role, children }) {
   const navigate = useNavigate();
 
-  const isUserAuth = useSelector((state) => state.user.isUserAuth);
+  const isUserAuth =
+    useSelector((state) => state.user.isUserAuth) ||
+    localStorage.getItem("token");
   const isOwnerAuth = useSelector((state) => state.owner.isOwnerAuth);
   const isAdminAuth = useSelector((state) => state.admin.isAdminAuth);
 

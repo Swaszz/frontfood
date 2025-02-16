@@ -1,11 +1,15 @@
 import "react";
 import useFetch from "../../hooks/useFetch";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MenuSkelton from "../../components/shared/Skelton";
 
 const Categorymenu = () => {
   const [category, isLoading] = useFetch("/menuitem/category");
+  const navigate = useNavigate();
 
+  const handleCategoryClick = (categoryName) => {
+    navigate(`/category/${categoryName}`);
+  };
   return (
     <div>
       {isLoading ? (
@@ -17,9 +21,13 @@ const Categorymenu = () => {
           </h2>
           <div className="categoryitem grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-20 gap-4">
             {category.map((category, index) => (
-              <Link key={index} to={`/category/${category}`}>
+              <div
+                key={index}
+                className="cursor-pointer transition-transform transform hover:scale-105"
+                onClick={() => handleCategoryClick(category._id)}
+              >
                 <CategoryCard category={category} />
-              </Link>
+              </div>
             ))}
           </div>
         </div>

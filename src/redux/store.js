@@ -2,9 +2,10 @@ import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./features/userSlice";
 import cartReducer from "../redux/features/CartSlice"
 import deliveryReducer from "./features/DeliverySlice";
-import orderReducer from "../redux/features/OrderSlice";
+import orderReducer from "../redux/features/orderSlice";
 import ownerReducer from "../redux/features/OwnerSlice";
-import adminReducer from "../redux/features/AdminSlice"
+import adminReducer from "../redux/features/AdminSlice";
+import paymentReducer from "../redux/features/PaymentSlice"
 const store = configureStore({
     reducer: {
         user: userReducer,
@@ -13,6 +14,7 @@ const store = configureStore({
         order : orderReducer,
         owner:ownerReducer,
         admin: adminReducer,
+        payment: paymentReducer,
     },
 });
 

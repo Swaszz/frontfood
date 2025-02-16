@@ -1,30 +1,32 @@
-import { useEffect, useState } from "react";
-import axiosInstance from "../../config/axiosInstance";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../config/axiosInstance";
 
-function Restaurantform() {
-  const navigate = useNavigate();
+const Restaurantform = () => {
   const [restaurant, setRestaurant] = useState({
     name: "",
     address: "",
     phone: "",
     email: "",
+    restaurantOwner: "",
   });
 
   const [restaurantId, setRestaurantId] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch Restaurant Details for Logged-in Owner
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
         const response = await axiosInstance.get("/restaurant/getrestaurant");
         if (response.data?.data) {
-          setRestaurant(response.data.data);
+          setRestaurant({
+            ...response.data.data,
+            restaurantOwner: response.data.data.restaurantownerId?.name || "",
+          });
           setRestaurantId(response.data.data._id);
-          toast.info("✅ Your restaurant details loaded.", { autoClose: 1500 });
+          toast.info("✅ Restaurant details loaded.", { autoClose: 1500 });
         }
       } catch (error) {
         console.log("No restaurant found. Showing Create Form");
@@ -35,214 +37,199 @@ function Restaurantform() {
     fetchRestaurant();
   }, []);
 
-  // ✅ Handle Input Changes
-  const handleChange = (e) => {
-    setRestaurant({ ...restaurant, [e.target.name]: e.target.value });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setRestaurant((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // ✅ Handle Create Restaurant (Only If No Restaurant Exists)
-  const handleSubmit = async (e) => {
+  // ✅ Create Restaurant
+  const addRestaurant = async (e) => {
     e.preventDefault();
-
-    if (restaurantId) {
-      toast.warning("⚠️ You already have a restaurant. Please edit it.", {
-        autoClose: 2000,
-      });
-      return;
-    }
-
     try {
-      const response = await axiosInstance.post(
-        "/restaurant/addrestaurant",
-        restaurant
-      );
-      setRestaurant(response.data.data);
+      const response = await axiosInstance.post("/restaurant/addrestaurant", {
+        ...restaurant,
+        restaurantOwner: restaurant.restaurantOwner,
+      });
+
       setRestaurantId(response.data.data._id);
-      setEditMode(false);
+      setRestaurant(response.data.data);
       toast.success("✅ Restaurant created successfully!", { autoClose: 1500 });
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "❌ Error saving restaurant details",
-        { autoClose: 2000 }
-      );
+      toast.error("❌ Error saving restaurant details", { autoClose: 2000 });
     }
   };
 
-  // ✅ Handle Update Restaurant (After Editing)
-  const handleUpdate = async (e) => {
+  // ✅ Update Restaurant
+  const updateRestaurant = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.put(
-        `/restaurant/updaterestaurant/${restaurantId}`,
-        restaurant
-      );
-      setEditMode(false); // ✅ Stays on the same page instead of redirecting
+      await axiosInstance.put(`/restaurant/updaterestaurant/${restaurantId}`, {
+        ...restaurant,
+        restaurantOwner: restaurant.restaurantOwner,
+      });
+
       toast.success("✅ Restaurant updated successfully!", { autoClose: 1500 });
+      setEditMode(false);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "❌ Error updating restaurant details",
-        { autoClose: 2000 }
-      );
+      toast.error("❌ Error updating restaurant details", { autoClose: 2000 });
     }
   };
 
-  // ✅ Handle Navigation to Create Menu (Can Go Anytime)
-  const handleNext = () => {
-    navigate(`/restaurantowner/createmenu`);
+  // ✅ Delete Restaurant
+  const deleteRestaurant = async () => {
+    try {
+      await axiosInstance.delete(
+        `/restaurant/deleterestaurant/${restaurantId}`
+      );
+      setRestaurant({
+        name: "",
+        address: "",
+        phone: "",
+        email: "",
+        restaurantOwner: "",
+      });
+      setRestaurantId(null);
+      toast.success("✅ Restaurant deleted successfully!", { autoClose: 1500 });
+    } catch (error) {
+      toast.error("❌ Error deleting restaurant", { autoClose: 2000 });
+    }
   };
 
-  if (loading) return <p>Loading...</p>;
-
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg max-w-5xl mx-auto">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        Manage Your Restaurant
-      </h2>
+    <div className="flex flex-col md:flex-row h-screen">
+      {/* Sidebar */}
+      <aside className="w-full md:w-1/4 bg-gray-800 text-white p-4">
+        <ul>
+          <li className="mb-4">
+            <Link to="/orders">Orders</Link>
+          </li>
+          <li className="mb-4">
+            <Link to="/menu">Menu</Link>
+          </li>
+          <li className="mb-4">
+            <Link to="/coupons">Coupons</Link>
+          </li>
+          <li className="mb-4">
+            <Link to="/payments">Payments</Link>
+          </li>
+        </ul>
+      </aside>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ✅ Right Box: Create Restaurant Form */}
-        <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-4">Create Your Restaurant</h3>
+      {/* Main Content */}
+      <main className="w-full md:w-3/4 p-6">
+        <h1 className="text-2xl font-bold mb-4">Restaurant Management</h1>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Restaurant Name"
-              value={restaurant.name}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
+        {/* ✅ "Create Restaurant" Form */}
+        <form
+          className="bg-white p-4 shadow-md rounded"
+          onSubmit={addRestaurant}
+        >
+          <input
+            type="text"
+            name="name"
+            placeholder="Restaurant Name"
+            className="input input-bordered w-full mb-2"
+            value={restaurant.name}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            className="input input-bordered w-full mb-2"
+            value={restaurant.address}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone"
+            className="input input-bordered w-full mb-2"
+            value={restaurant.phone}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="input input-bordered w-full mb-2"
+            value={restaurant.email}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="text"
+            name="restaurantOwner"
+            placeholder="Restaurant Owner Name"
+            className="input input-bordered w-full mb-2"
+            value={restaurant.restaurantOwner}
+            onChange={handleInputChange}
+            required
+          />
+          <button className="btn btn-primary w-full" type="submit">
+            Create Restaurant
+          </button>
+        </form>
 
-            <input
-              type="text"
-              name="address"
-              placeholder="Restaurant Address"
-              value={restaurant.address}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
-
-            <input
-              type="text"
-              name="phone"
-              placeholder="Phone Number"
-              value={restaurant.phone}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
-
-            <input
-              type="email"
-              name="email"
-              placeholder="Restaurant Email"
-              value={restaurant.email}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
-
-            {/* ✅ Create Restaurant Button */}
-            <button type="submit" className="btn btn-primary w-full">
-              Create Restaurant
-            </button>
-          </form>
-        </div>
-
-        {/* ✅ Left Box: Restaurant Details */}
-        <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-4">
-            {restaurantId ? "Your Restaurant Details" : "No Restaurant Found"}
-          </h3>
-
-          {restaurantId ? (
-            <div>
-              <p>
-                <strong>Name:</strong> {restaurant.name}
-              </p>
-              <p>
-                <strong>Address:</strong> {restaurant.address}
-              </p>
-              <p>
-                <strong>Phone:</strong> {restaurant.phone}
-              </p>
-              <p>
-                <strong>Email:</strong> {restaurant.email}
-              </p>
-
-              {editMode ? (
-                <form onSubmit={handleUpdate} className="space-y-4">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Restaurant Name"
-                    value={restaurant.name}
-                    onChange={handleChange}
-                    className="input input-bordered w-full"
-                    required
-                  />
-
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Restaurant Address"
-                    value={restaurant.address}
-                    onChange={handleChange}
-                    className="input input-bordered w-full"
-                    required
-                  />
-
-                  <input
-                    type="text"
-                    name="phone"
-                    placeholder="Phone Number"
-                    value={restaurant.phone}
-                    onChange={handleChange}
-                    className="input input-bordered w-full"
-                    required
-                  />
-
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Restaurant Email"
-                    value={restaurant.email}
-                    onChange={handleChange}
-                    className="input input-bordered w-full"
-                    required
-                  />
-
-                  <button type="submit" className="btn btn-success w-full">
-                    Done ✅ Save Changes
-                  </button>
-                </form>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-secondary w-full mt-2"
-                  onClick={() => setEditMode(true)}
-                >
-                  Edit ✏️ Restaurant
-                </button>
+        {/* ✅ Restaurant List */}
+        <div className="mt-6">
+          <h2 className="text-xl font-bold mb-2">Restaurants</h2>
+          <table className="table w-full">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Restaurant Owner</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {restaurantId && (
+                <tr>
+                  <td>{restaurant.name}</td>
+                  <td>{restaurant.address}</td>
+                  <td>{restaurant.phone}</td>
+                  <td>{restaurant.email}</td>
+                  <td>{restaurant.restaurantOwner}</td>
+                  <td>
+                    <button
+                      className="btn btn-warning btn-sm mr-2"
+                      onClick={() => setEditMode(true)}
+                    >
+                      Edit
+                    </button>
+                    {editMode && (
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={updateRestaurant}
+                      >
+                        Save Changes
+                      </button>
+                    )}
+                    <button
+                      className="btn btn-danger btn-sm ml-2"
+                      onClick={deleteRestaurant}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
               )}
-            </div>
-          ) : (
-            <p className="text-gray-500">No restaurant added yet.</p>
-          )}
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      {/* ✅ Bottom: Next Button (Always Visible) */}
-      <div className="flex justify-center mt-6">
-        <button type="button" className="btn btn-accent" onClick={handleNext}>
-          Next ➡ Create Menu
-        </button>
-      </div>
+      </main>
     </div>
   );
-}
+};
 
 export default Restaurantform;

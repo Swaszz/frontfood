@@ -9,21 +9,18 @@ import {
   deleteAddress,
 } from "../../redux/features/DeliverySlice";
 import { fetchCart } from "../../redux/features/CartSlice";
-import {
-  fetchOrderSummary,
-  setOrderDetails,
-} from "../../redux/features/OrderSlice";
+import { setOrder } from "../../redux/features/orderSlice";
 import "react-toastify/dist/ReactToastify.css";
-import { saveSelectedAddress } from "../../Utils/Orderutils";
+//import { saveSelectedAddress } from "../../Utils/Orderutils";
 
 function DeliveryAddress() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const orderState = useSelector((state) => state.order);
   const { addresses, isLoading, error } = useSelector(
     (state) => state.delivery
   );
-  const { order } = useSelector((state) => state.order);
   const { cart } = useSelector((state) => state.cart);
 
   const [form, setForm] = useState({
@@ -39,10 +36,8 @@ function DeliveryAddress() {
   const [selectedAddress, setSelectedAddress] = useState(null);
 
   useEffect(() => {
-    console.log("Fetching Cart Data...");
-    dispatch(fetchCart());
     dispatch(fetchAddresses());
-    dispatch(fetchOrderSummary());
+    dispatch(fetchCart());
   }, [dispatch]);
 
   const handleChange = (e) => {
@@ -62,7 +57,6 @@ function DeliveryAddress() {
         await dispatch(addAddress(form)).unwrap();
         toast.success("Address added successfully!");
       }
-
       setForm({
         street: "",
         city: "",
@@ -107,9 +101,21 @@ function DeliveryAddress() {
     setSelectedAddress(address);
   };
 
-  const handleDeliverToThisAddress = () => {
-    console.log("Checking Cart Data Before Navigation:", cart);
-    console.log("Checking Order State Before Navigation:", order);
+  useEffect(() => {
+    console.log(" Watching Redux order state updates...", orderState.order);
+
+    if (
+      orderState?.order?.orderItems &&
+      orderState.order.orderItems.length > 0
+    ) {
+      console.log(" Order is set, Navigating to Order Page...");
+      navigate("/user/order");
+    } else {
+      console.warn("⚠️ Order items are still empty, waiting for update...");
+    }
+  }, [orderState?.order?.orderItems?.length, navigate]);
+  const handleDeliverToThisAddress = async () => {
+    console.log(" Checking Cart Data Before Navigation:", cart);
 
     if (!selectedAddress) {
       toast.error("Please select a delivery address.");
@@ -122,21 +128,19 @@ function DeliveryAddress() {
       return;
     }
 
-    dispatch(
-      setOrderDetails({
-        deliveryAddress: selectedAddress,
+    await dispatch(
+      setOrder({
         orderItems: cart.cartItems,
         totalAmount: cart.totalAmount,
-        discountAmount: cart.discountAmount,
+        discountAmount: cart.discountAmount || 0,
         appliedCoupon: cart.appliedCoupon,
+        deliveryAddress: selectedAddress,
       })
     );
 
-    saveSelectedAddress(selectedAddress);
-
-    console.log(" Navigating to Order Page...");
-    navigate("/user/order");
+    console.log("🔄 Waiting for Redux to update...");
   };
+
   return (
     <div className="container mx-auto max-w-4xl p-6">
       <ToastContainer />
@@ -243,17 +247,9 @@ function DeliveryAddress() {
                   onClick={() => handleSelectAddress(addr)}
                 >
                   <p className="font-semibold text-gray-700">
-                    {addr.street && `${addr.street}, `}
-                    {addr.city && `${addr.city}, `}
-                    {addr.state && `${addr.state} - `}
-                    {addr.zipCode && `${addr.zipCode}, `}
+                    {addr.street}, {addr.city}, {addr.state} - {addr.zipCode},{" "}
                     {addr.country}
                   </p>
-                  {addr.isDefault && (
-                    <span className="text-green-600 font-bold text-sm">
-                      [Default]
-                    </span>
-                  )}
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={(e) => {

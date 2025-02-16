@@ -48,7 +48,7 @@ const UserLayout = () => {
       )}
       {searchQuery && <SearchResults searchQuery={searchQuery} />}
 
-      <div className="min-h-96">
+      <div className="min-h-98">
         <Outlet />
       </div>
 

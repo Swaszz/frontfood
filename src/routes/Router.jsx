@@ -22,6 +22,9 @@ import { Outlet } from "react-router-dom";
 import Menuitemform from "../pages/restaurantowner/Menuitemform";
 import Restaurantform from "../pages/restaurantowner/RestaurantForm";
 import Couponform from "../pages/restaurantowner/Couponform";
+import Categorypage from "../pages/user/Categorypage";
+import Categorypages from "../pages/restaurantowner/Categorypages";
+import Payment from "../pages/user/Payment";
 <ScrollToTop />;
 const router = createBrowserRouter([
   {
@@ -36,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "search/:query",
         element: <Productitem />,
+      },
+      {
+        path: "/category/:categoryName",
+        element: <Categorypage />,
       },
       {
         path: "signup",
@@ -87,8 +94,8 @@ const router = createBrowserRouter([
             element: <Orderhistory />,
           },
           {
-            path: "payment/success",
-            // element: <h2>Payment success</h2>,
+            path: "payment",
+            element: <Payment />,
           },
         ],
       },
@@ -118,6 +125,10 @@ const router = createBrowserRouter([
       {
         path: "about",
         element: <About />,
+      },
+      {
+        path: "category/:categoryName",
+        element: <Categorypages />,
       },
       {
         path: "profile",

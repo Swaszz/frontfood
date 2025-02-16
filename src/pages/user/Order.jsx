@@ -1,150 +1,145 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import axiosInstance from "../../config/axiosInstance";
 import {
-  setOrder,
-  setOrderDetails,
-  cancelOrder,
-} from "../../redux/features/OrderSlice";
-import "react-toastify/dist/ReactToastify.css";
+  fetchOrderSummary,
+  clearOrder,
+  //updateOrderStatus,
+} from "../../redux/features/orderSlice";
+import axiosInstance from "../../config/axiosInstance";
+import { toast } from "react-toastify";
 
 function Order() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { order } = useSelector((state) => state.order);
-  const { userData } = useSelector((state) => state.user);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  useEffect(() => {
-    console.log("🔍 Redux User Info:", userData);
-  }, [userData]);
-  useEffect(() => {
-    const fetchOrderSummary = async () => {
-      try {
-        const response = await axiosInstance.get("/order/getorder");
-        dispatch(setOrder(response.data.data));
-      } catch (error) {
-        console.error(" Error fetching order summary:", error);
-      }
-    };
+  const orderState = useSelector((state) => state.order);
 
-    fetchOrderSummary();
+  const order = useSelector((state) => state.order.order);
+  const loading = useSelector((state) => state.order.loading);
+
+  useEffect(() => {
+    dispatch(fetchOrderSummary());
   }, [dispatch]);
-
   useEffect(() => {
-    if (order.deliveryAddress) {
-      console.log(
-        "Setting Delivery Address from Redux:",
-        order.deliveryAddress
-      );
-      setSelectedAddress(order.deliveryAddress);
-    }
-  }, [order.deliveryAddress]);
+    console.log(
+      "🛒 Current Redux Order State Before Placing Order:",
+      orderState.order
+    );
+  }, [orderState.order]);
 
   const handlePlaceOrder = async () => {
-    if (!userData?.id) {
-      console.error("Missing userId in userInfo:", userData);
-      toast.error("User is not logged in. Please log in to place an order.");
-      return;
-    }
-
-    if (!order.restaurant || !order.restaurant._id) {
-      console.error("Missing restaurantId in order:", order);
-      toast.error("Error: Missing restaurant ID. Please select a restaurant.");
-      return;
-    }
-
-    const orderData = {
-      userId: userData.id,
-      restaurantId: order.restaurant._id,
-      deliveryAddress: order.deliveryAddress,
-      menuItem: order.orderItems,
-    };
-
-    console.log(" Placing Order with:", orderData);
+    console.log("🛒 Placing Order with:", orderState.order);
 
     try {
-      const response = await axiosInstance.post("/order/placeorder", orderData);
-      console.log(" Order Placed Successfully:", response.data);
-      dispatch(setOrderDetails(response.data.data));
+      const response = await axiosInstance.post("/order/placeorder", {
+        menuItem: orderState.order.orderItems.map((item) => ({
+          menuItemId: item._id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        totalAmount: orderState.order.totalAmount,
+        discountAmount: orderState.order.discountAmount,
+        appliedCoupon: orderState.order.appliedCoupon,
+        deliveryAddress: orderState.order.deliveryAddress,
+      });
+
+      console.log("Order Placed Successfully:", response.data);
       toast.success("Order placed successfully!");
       navigate("/user/payment");
     } catch (error) {
       console.error(
-        "Failed to place order:",
+        "Error placing order:",
         error.response?.data || error.message
       );
-      toast.error("Failed to place order.");
+      toast.error("Failed to place order. Please try again.");
     }
   };
 
   const handleCancelOrder = async () => {
     try {
-      await axiosInstance.post("/order/cancel", { orderId: order._id });
-      dispatch(cancelOrder());
-      toast.success("Order cancelled successfully.");
+      const response = await axiosInstance.delete("/order/cancelorder", {
+        data: { orderId: order._id },
+      });
+
+      if (response.data.success) {
+        dispatch(clearOrder());
+        alert("Order Cancelled");
+      }
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to cancel order.");
+      console.error("Error cancelling order:", error);
     }
   };
 
-  if (!order || !order.orderItems) return <p>Loading order details...</p>;
+  if (loading) return <p>Loading order details...</p>;
+  if (!order || !order.orderItems || order.orderItems.length === 0) {
+    return <p>No items in order.</p>;
+  }
 
   return (
-    <div className="container mx-auto max-w-4xl p-6">
-      <ToastContainer />
-      <h1 className="text-3xl font-bold text-black-800 mb-6 text-center">
-        Order Summary
-      </h1>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">Order Summary</h1>
 
       <div className="bg-white p-6 rounded-lg shadow-lg">
-        {order.orderItems.map((item) => (
-          <div key={item.menuItemId} className="flex items-center border-b p-4">
+        {order.orderItems.map((item, index) => (
+          <div
+            key={item.menuItemId || `orderItem-${index}`}
+            className="flex items-center border-b p-4"
+          >
             <img
               src={item.image}
               alt={item.name}
               className="w-20 h-20 object-cover rounded-lg"
             />
             <div className="ml-4 flex-1">
-              <h3 className="text-lg">{item.name}</h3>
+              <h3 className="text-lg font-semibold">{item.name}</h3>
               <p className="text-gray-500">
                 ${item.price.toFixed(2)} x {item.quantity}
               </p>
             </div>
-            <p className="font-bold">${item.price * item.quantity}</p>
+            <p className="font-bold">
+              ${(item.price * item.quantity).toFixed(2)}
+            </p>
           </div>
         ))}
 
-        <h3 className="text-xl font-bold mt-4">
-          Total: ${order.totalAmount.toFixed(2)}
-        </h3>
-
         <div className="mt-4">
-          <h2 className="text-xl font-semibold"> Delivery Address</h2>
-          {selectedAddress ? (
+          <h2 className="text-xl font-semibold">Delivery Address</h2>
+          {order.deliveryAddress ? (
             <p>
-              {selectedAddress.street}, {selectedAddress.city},{" "}
-              {selectedAddress.state}
+              {order.deliveryAddress.street}, {order.deliveryAddress.city},{" "}
+              {order.deliveryAddress.state}
             </p>
           ) : (
             <p className="text-gray-500">No delivery address selected.</p>
           )}
         </div>
 
-        <div className="mt-6 flex gap-4">
-          <button
-            onClick={handlePlaceOrder}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg"
-          >
-            ✅ Place Order
-          </button>
+        <h2 className="text-lg font-semibold mt-4">
+          Restaurant: {order.restaurant?.name || "Unknown"}
+        </h2>
+
+        <h3 className="text-xl font-bold mt-4">
+          Total Price: ${order.totalAmount.toFixed(2)}
+        </h3>
+        {order.discountAmount > 0 && (
+          <p className="text-green-600">
+            Discount: -${order.discountAmount.toFixed(2)}
+          </p>
+        )}
+
+        <div className="mt-6 flex justify-between">
           <button
             onClick={handleCancelOrder}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg"
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition"
           >
-            ❌ Cancel Order
+            Cancel Order
+          </button>
+          <button
+            onClick={handlePlaceOrder}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+          >
+            Place Order
           </button>
         </div>
       </div>

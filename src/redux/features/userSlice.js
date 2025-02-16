@@ -1,41 +1,55 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    isUserAuth: false,
-    userData: {},
-   
+  userData: localStorage.getItem("userData") || null, 
+  isAuthenticated: localStorage.getItem("userData"),  
+  loading: false,
+  error: null,
 };
-
 export const userSlice = createSlice({
-    name: "user",
-    initialState,
-    reducers: {
-        saveUser: (state, action) => {
-            state.isUserAuth = true;
-            state.userData = action.payload;
-           
-        },
-        clearUser: (state) => {
-            state.isUserAuth = false;
-            state.userData = {};
-           
-        },
-        setUser: (state, action) => {
-            state.userInfo = action.payload;
-            state.isAuthenticated = true;
-            
-          },
-          loginUser: (state, action) => {
-            state.isUserAuth = true;
-            state.userData = action.payload;
-          },
-          logoutUser: (state) => {
-            state.isUserAuth = false;
-            state.userData = null;
-          },
+  name: "user",
+  initialState,
+  reducers: {
+    saveUser: (state, action) => {
+      state.isUserAuth = true;
+      state.userData = action.payload;
+      localStorage.setItem("userData", action.payload);
     },
+
+    clearUser: (state) => {
+      state.isUserAuth = false;
+      state.userData = {}; 
+      localStorage.removeItem("userData"); 
+      localStorage.removeItem("userInfo"); 
+    },
+
+    setUser: (state, action) => {
+      state.userInfo = action.payload;
+      state.isUserAuth = true;
+      localStorage.setItem("userInfo", action.payload);
+    },
+
+    setUserData: (state, action) => {
+      state.userData = action.payload;
+      state.isUserAuth = true;
+      localStorage.setItem("userData", action.payload);
+    },
+
+    loginUser: (state, action) => {
+      state.isAuthenticated = true;
+      state.userId = action.payload; 
+      localStorage.setItem("userData",(action.payload)); 
+    },
+
+    logoutUser: (state) => {
+      state.isUserAuth = false;
+      state.userData = null;
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userInfo");
+    },
+  },
 });
 
-export const { saveUser, clearUser , setUser,logoutUser} = userSlice.actions;
+export const { saveUser, setUserData, clearUser, setUser, logoutUser } = userSlice.actions;
 
 export default userSlice.reducer;

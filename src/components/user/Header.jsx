@@ -67,7 +67,7 @@ const Header = () => {
               </button>
             </li>
 
-            <li className="block xs:hidden">
+            <li className="block sm:hidden">
               <DarkMode className="w-5 h-5" />
             </li>
 
@@ -85,9 +85,7 @@ const Header = () => {
 
         <Link
           to="/"
-          className="font-bold italic text-red-600 btn btn-ghost 
-  text-xl md:text-2xl lg:text-3xl 
-  px-2 sm:px-4 font-[Trebuchet_MS] tracking-wide"
+          className="font-bold italic text-red-600 btn btn-ghost text-xl md:text-2xl lg:text-3xl px-2 sm:px-4 font-[Trebuchet_MS] tracking-wide"
         >
           Food Delight
         </Link>
@@ -141,7 +139,7 @@ const Header = () => {
           </button>
         </div>
 
-        <div className="hidden xs:flex">
+        <div className="hidden sm:flex">
           <DarkMode className="w-5 h-5" />
         </div>
 

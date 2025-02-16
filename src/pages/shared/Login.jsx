@@ -29,12 +29,12 @@ const Login = ({ role }) => {
   const onSubmit = async (data) => {
     try {
       const response = await axiosInstance.put(user.loginAPI, data);
+
       localStorage.setItem("token", response.data.token);
       dispatch(saveUser(response?.data?.data));
 
       toast.success("Login Successful! Redirecting...", {
         position: "top-center",
-        autoClose: 2000,
       });
 
       setTimeout(() => navigate(user.profileRoute), 2500);
@@ -43,7 +43,6 @@ const Login = ({ role }) => {
       dispatch(clearUser());
       toast.error("Login Failed! Please check your credentials.", {
         position: "top-center",
-        autoClose: 3000,
       });
     }
   };
