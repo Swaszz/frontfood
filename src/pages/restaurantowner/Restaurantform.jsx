@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axiosInstance";
 
-const RestaurantForm = () => {
+const Restaurantform = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [restaurant, setRestaurant] = useState({
     name: "",
@@ -232,4 +232,4 @@ const RestaurantForm = () => {
   );
 };
 
-export default RestaurantForm;
+export default Restaurantform;

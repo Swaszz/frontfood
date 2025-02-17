@@ -20,7 +20,7 @@ import Ownerhome from "../pages/restaurantowner/Ownerhome";
 import ScrollToTop from "../components/ScrollToTop";
 import { Outlet } from "react-router-dom";
 import Menuitemform from "../pages/restaurantowner/Menuitemform";
-import Restaurantform from "../pages/restaurantowner/RestaurantForm";
+import Restaurantform from "../pages/restaurantowner/Restaurantform";
 import Couponform from "../pages/restaurantowner/Couponform";
 import Categorypage from "../pages/user/Categorypage";
 import Categorypages from "../pages/restaurantowner/Categorypages";
