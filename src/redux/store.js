@@ -1,11 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./features/userSlice";
-import cartReducer from "../redux/features/CartSlice"
+import cartReducer from "./features/CartSlice"
 import deliveryReducer from "./features/DeliverySlice";
-import orderReducer from "src/redux/features/OrderSlice";
-import ownerReducer from "../redux/features/OwnerSlice";
-import adminReducer from "../redux/features/AdminSlice";
-import paymentReducer from "../redux/features/PaymentSlice"
+import orderReducer from "./features/OrderSlice";
+import ownerReducer from "./features/OwnerSlice";
+import adminReducer from "./features/AdminSlice";
+import paymentReducer from "./features/PaymentSlice"
 const store = configureStore({
     reducer: {
         user: userReducer,
