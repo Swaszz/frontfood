@@ -52,7 +52,7 @@ const initialState = {
 };
 
 
-const orderSlice = createSlice({
+const OrderSlice = createSlice({
   name: "order",
   initialState,
   reducers: {
@@ -121,5 +121,5 @@ const orderSlice = createSlice({
 });
 
 
-export const { setOrder, applyOrderCoupon, clearOrder, updateOrderStatus, setOrderHistory } = orderSlice.actions;
-export default orderSlice.reducer;
+export const { setOrder, applyOrderCoupon, clearOrder, updateOrderStatus, setOrderHistory } = OrderSlice.actions;
+export default OrderSlice.reducer;

@@ -9,7 +9,7 @@ import {
   deleteAddress,
 } from "../../redux/features/DeliverySlice";
 import { fetchCart } from "../../redux/features/CartSlice";
-import { setOrder } from "../../redux/features/orderSlice";
+import { setOrder } from "../../redux/features/OrderSlice";
 import "react-toastify/dist/ReactToastify.css";
 //import { saveSelectedAddress } from "../../Utils/Orderutils";
 
@@ -149,6 +149,7 @@ function DeliveryAddress() {
         Delivery Addresses
       </h1>
 
+      {/* Address Form */}
       <form
         onSubmit={handleSaveAddress}
         className="bg-white p-6 rounded-lg shadow-lg"
@@ -224,6 +225,7 @@ function DeliveryAddress() {
         </div>
       </form>
 
+      {/* Loading & Error Handling */}
       {isLoading ? (
         <p>Loading...</p>
       ) : error ? (
@@ -287,5 +289,4 @@ function DeliveryAddress() {
     </div>
   );
 }
-
 export default DeliveryAddress;

@@ -5,7 +5,7 @@ import {
   fetchOrderSummary,
   clearOrder,
   //updateOrderStatus,
-} from "../../redux/features/orderSlice";
+} from "../../redux/features/OrderSlice";
 import axiosInstance from "../../config/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
