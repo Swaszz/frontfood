@@ -25,6 +25,8 @@ import Couponform from "../pages/restaurantowner/Couponform";
 import Categorypage from "../pages/user/Categorypage";
 import Categorypages from "../pages/restaurantowner/Categorypages";
 import Payment from "../pages/user/Payment";
+import Orderform from "../pages/restaurantowner/Orderform";
+import ProductItems from "../pages/restaurantowner/Productitems";
 <ScrollToTop />;
 const router = createBrowserRouter([
   {
@@ -112,7 +114,7 @@ const router = createBrowserRouter([
       },
       {
         path: "search/:query",
-        //  element: <Productitem />,
+        element: <ProductItems />,
       },
       {
         path: "login",
@@ -159,6 +161,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute role="restaurantowner">
             <Couponform />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "createcoupon",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <Orderform />
           </ProtectedRoute>
         ),
       },

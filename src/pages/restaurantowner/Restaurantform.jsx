@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axiosInstance";
 
-const Restaurantform = () => {
+const RestaurantForm = () => {
+  const [restaurants, setRestaurants] = useState([]);
   const [restaurant, setRestaurant] = useState({
     name: "",
     address: "",
@@ -11,80 +12,33 @@ const Restaurantform = () => {
     email: "",
     restaurantOwner: "",
   });
-
-  const [restaurantId, setRestaurantId] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
-      try {
-        const response = await axiosInstance.get("/restaurant/getrestaurant");
-        if (response.data?.data) {
-          setRestaurant({
-            ...response.data.data,
-            restaurantOwner: response.data.data.restaurantownerId?.name || "",
-          });
-          setRestaurantId(response.data.data._id);
-          toast.info("✅ Restaurant details loaded.", { autoClose: 1500 });
-        }
-      } catch (error) {
-        console.log("No restaurant found. Showing Create Form");
-      }
-      setLoading(false);
-    };
-
-    fetchRestaurant();
+    fetchRestaurants();
   }, []);
+
+  const fetchRestaurants = async () => {
+    try {
+      const response = await axiosInstance.get("/restaurant/getrestaurant");
+      setRestaurants(response.data.data);
+    } catch (error) {
+      toast.error("Error fetching restaurants");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    setRestaurant((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setRestaurant((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Create Restaurant
   const addRestaurant = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axiosInstance.post("/restaurant/addrestaurant", {
-        ...restaurant,
-        restaurantOwner: restaurant.restaurantOwner,
-      });
-
-      setRestaurantId(response.data.data._id);
-      setRestaurant(response.data.data);
-      toast.success("✅ Restaurant created successfully!", { autoClose: 1500 });
-    } catch (error) {
-      toast.error("❌ Error saving restaurant details", { autoClose: 2000 });
-    }
-  };
-
-  // ✅ Update Restaurant
-  const updateRestaurant = async (e) => {
-    e.preventDefault();
-    try {
-      await axiosInstance.put(`/restaurant/updaterestaurant/${restaurantId}`, {
-        ...restaurant,
-        restaurantOwner: restaurant.restaurantOwner,
-      });
-
-      toast.success("✅ Restaurant updated successfully!", { autoClose: 1500 });
-      setEditMode(false);
-    } catch (error) {
-      toast.error("❌ Error updating restaurant details", { autoClose: 2000 });
-    }
-  };
-
-  // ✅ Delete Restaurant
-  const deleteRestaurant = async () => {
-    try {
-      await axiosInstance.delete(
-        `/restaurant/deleterestaurant/${restaurantId}`
-      );
+      await axiosInstance.post("/restaurant/addrestaurant", restaurant);
+      toast.success("✅ Restaurant created successfully!");
+      fetchRestaurants();
       setRestaurant({
         name: "",
         address: "",
@@ -92,10 +46,56 @@ const Restaurantform = () => {
         email: "",
         restaurantOwner: "",
       });
-      setRestaurantId(null);
-      toast.success("✅ Restaurant deleted successfully!", { autoClose: 1500 });
     } catch (error) {
-      toast.error("❌ Error deleting restaurant", { autoClose: 2000 });
+      console.error(
+        "Error creating restaurant:",
+        error.response?.data || error.message
+      );
+      toast.error("❌ Error saving restaurant details");
+    }
+  };
+
+  const handleEdit = (restaurant) => {
+    setRestaurant(restaurant);
+    setEditingId(restaurant._id);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await axiosInstance.put(`/restaurant/updaterestaurant/${editingId}`, {
+        name: restaurant.name,
+        address: restaurant.address,
+        phone: restaurant.phone,
+        email: restaurant.email,
+        restaurantOwner: restaurant.restaurantOwner,
+      });
+
+      toast.success("Restaurant updated successfully!");
+      fetchRestaurants();
+      setEditingId(null);
+      setRestaurant({
+        name: "",
+        address: "",
+        phone: "",
+        email: "",
+        restaurantOwner: "",
+      });
+    } catch (error) {
+      console.error(
+        "Error updating restaurant:",
+        error.response?.data || error.message
+      );
+      toast.error(" Error updating restaurant");
+    }
+  };
+
+  const deleteRestaurant = async (id) => {
+    try {
+      await axiosInstance.delete(`/restaurant/deleterestaurant/${id}`);
+      toast.success("Restaurant deleted successfully!");
+      fetchRestaurants();
+    } catch (error) {
+      toast.error("Error deleting restaurant");
     }
   };
 
@@ -119,11 +119,9 @@ const Restaurantform = () => {
         </ul>
       </aside>
 
-      {/* Main Content */}
       <main className="w-full md:w-3/4 p-6">
         <h1 className="text-2xl font-bold mb-4">Restaurant Management</h1>
 
-        {/* ✅ "Create Restaurant" Form */}
         <form
           className="bg-white p-4 shadow-md rounded"
           onSubmit={addRestaurant}
@@ -167,12 +165,13 @@ const Restaurantform = () => {
           <input
             type="text"
             name="restaurantOwner"
-            placeholder="Restaurant Owner Name"
+            placeholder="Restaurant Owner"
             className="input input-bordered w-full mb-2"
             value={restaurant.restaurantOwner}
             onChange={handleInputChange}
             required
           />
+
           <button className="btn btn-primary w-full" type="submit">
             Create Restaurant
           </button>
@@ -181,49 +180,50 @@ const Restaurantform = () => {
         {/* ✅ Restaurant List */}
         <div className="mt-6">
           <h2 className="text-xl font-bold mb-2">Restaurants</h2>
-          <table className="table w-full">
+          <table className="table w-full border">
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Restaurant Owner</th>
-                <th>Actions</th>
+              <tr className="bg-gray-100">
+                <th className="border p-2">Name</th>
+                <th className="border p-2">Address</th>
+                <th className="border p-2">Phone</th>
+                <th className="border p-2">Email</th>
+                <th className="border p-2">Owner</th>
+                <th className="border p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {restaurantId && (
-                <tr>
-                  <td>{restaurant.name}</td>
-                  <td>{restaurant.address}</td>
-                  <td>{restaurant.phone}</td>
-                  <td>{restaurant.email}</td>
-                  <td>{restaurant.restaurantOwner}</td>
-                  <td>
-                    <button
-                      className="btn btn-warning btn-sm mr-2"
-                      onClick={() => setEditMode(true)}
-                    >
-                      Edit
-                    </button>
-                    {editMode && (
+              {restaurants.map((r) => (
+                <tr key={r._id} className="text-center">
+                  <td className="border p-2">{r.name}</td>
+                  <td className="border p-2">{r.address}</td>
+                  <td className="border p-2">{r.phone}</td>
+                  <td className="border p-2">{r.email}</td>
+                  <td className="border p-2">{r.restaurantOwner || "N/A"}</td>
+                  <td className="border p-2">
+                    {editingId === r._id ? (
                       <button
-                        className="btn btn-success btn-sm"
-                        onClick={updateRestaurant}
+                        className="btn btn-success btn-sm mr-2"
+                        onClick={handleUpdate}
                       >
-                        Save Changes
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-warning btn-sm mr-2"
+                        onClick={() => handleEdit(r)}
+                      >
+                        Edit
                       </button>
                     )}
                     <button
-                      className="btn btn-danger btn-sm ml-2"
-                      onClick={deleteRestaurant}
+                      className="btn btn-danger btn-sm"
+                      onClick={() => deleteRestaurant(r._id)}
                     >
                       Delete
                     </button>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
@@ -232,4 +232,4 @@ const Restaurantform = () => {
   );
 };
 
-export default Restaurantform;
+export default RestaurantForm;

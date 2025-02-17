@@ -14,14 +14,22 @@ export const fetchOrderSummary = createAsyncThunk(
   }
 );
 
-
 export const fetchOrderHistory = createAsyncThunk(
   "order/fetchOrderHistory",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/order/history");
-      return response.data.data;
+      
+      console.log("Fetched Order History API Response:", response.data); 
+      if (Array.isArray(response.data)) {
+        return response.data; 
+      } else if (Array.isArray(response.data.data)) {
+        return response.data.data; 
+      } else {
+        return rejectWithValue("Unexpected API response format");
+      }
     } catch (error) {
+      console.error("Error fetching order history:", error.response?.data || error.message);
       return rejectWithValue(error.response?.data || "Error fetching order history");
     }
   }

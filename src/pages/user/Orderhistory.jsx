@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchOrderHistory } from "../../redux/features/OrderSlice";
+import { fetchOrderHistory } from "../../redux/features/orderSlice";
 const OrderHistory = () => {
   const dispatch = useDispatch();
   const { orderHistory, loading, error } = useSelector((state) => state.order);

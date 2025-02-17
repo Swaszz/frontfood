@@ -7,47 +7,77 @@ import {
   updateItemQuantity,
   removeItemFromCart,
   clearCart,
-  applyCoupon,
   proceedToCheckout,
 } from "../../redux/features/CartSlice";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { cart } = useSelector((state) => state.cart);
-  const [couponCode, setCouponCode] = useState("");
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState("");
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const response = await axiosInstance.get("/coupon/get");
+        console.log("Coupons API Response:", response.data);
+
+        if (Array.isArray(response.data?.data)) {
+          setAvailableCoupons(response.data.data);
+        } else {
+          setAvailableCoupons([]);
+        }
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+        toast.error("Failed to load coupons!");
+      }
+    };
+
+    fetchCoupons();
+  }, []);
 
   useEffect(() => {
     const fetchCartData = async () => {
       try {
         const response = await axiosInstance.get("/cart/getcart");
-        dispatch(setCart(response.data.data));
+        dispatch(
+          setCart(
+            response.data?.data || {
+              cartItems: [],
+              totalAmount: 0,
+              cartId: null,
+            }
+          )
+        );
       } catch (error) {
         console.error("Error fetching cart:", error);
+        dispatch(setCart({ cartItems: [], totalAmount: 0, cartId: null }));
       }
     };
+
     fetchCartData();
-  }, [dispatch]);
+  }, [dispatch, cart]);
 
   const handleUpdateQuantity = async (menuItemId, newQuantity) => {
     if (newQuantity < 1) return;
     try {
-      console.log("Updating Quantity for:", { menuItemId, newQuantity });
-
-      const response = await axiosInstance.put("/cart/updatequantity", {
-        cartId: cart.cartId,
+      await axiosInstance.put("/cart/updatequantity", {
+        cartId: cart?.cartId,
         menuItemId,
         quantity: newQuantity,
       });
 
-      console.log("API Response:", response.data);
-
       dispatch(updateItemQuantity({ menuItemId, quantity: newQuantity }));
 
       const updatedCartResponse = await axiosInstance.get("/cart/getcart");
-      dispatch(setCart(updatedCartResponse.data.data));
+      dispatch(
+        setCart(
+          updatedCartResponse.data?.data || { cartItems: [], totalAmount: 0 }
+        )
+      );
     } catch (error) {
       console.error(
         "Error updating quantity:",
@@ -67,12 +97,9 @@ const Cart = () => {
 
   const handleClearCart = async () => {
     try {
-      console.log("Clearing Cart...");
-
       await axiosInstance.delete("/cart/emptycart", {
-        data: { cartId: cart.cartId },
+        data: { cartId: cart?.cartId },
       });
-
       dispatch(clearCart());
     } catch (error) {
       console.error("Error clearing cart:", error);
@@ -82,25 +109,23 @@ const Cart = () => {
 
   const handleApplyCoupon = async () => {
     try {
-      console.log("Attempting to Apply Coupon:", couponCode);
-
-      if (!couponCode) {
+      if (!selectedCoupon) {
+        toast.error("Please select a coupon!");
         return;
       }
 
-      if (cart.appliedCoupon) {
-        toast.error(" A coupon is already applied. Remove it first!");
+      if (cart?.appliedCoupon) {
+        toast.error("A coupon is already applied. Remove it first!");
         return;
       }
 
       const response = await axiosInstance.post("/coupon/apply", {
-        cartId: cart.cartId,
-        couponCode,
+        cartId: cart?.cartId,
+        couponCode: selectedCoupon,
       });
 
-      console.log("Coupon Applied Successfully:", response.data);
-
-      dispatch(setCart(response.data.cart));
+      dispatch(setCart(response.data?.cart));
+      toast.success("Coupon applied successfully!");
     } catch (error) {
       console.error("Error applying coupon:", error);
       toast.error("Error applying coupon!");
@@ -109,18 +134,21 @@ const Cart = () => {
 
   const handleProceedToCheckout = async () => {
     try {
-      await axiosInstance.post("/cart/checkout", { cartId: cart.cartId });
+      await axiosInstance.post("/cart/checkout", { cartId: cart?.cartId });
       dispatch(proceedToCheckout());
       navigate("/user/delivery");
     } catch (error) {
       console.error("Error proceeding to checkout:", error);
     }
   };
-  if (!cart || !cart.cartItems) {
-    return <p>Your cart is empty.</p>;
+
+  if (!cart || !Array.isArray(cart.cartItems)) {
+    return <p className="text-center text-gray-600">Loading cart...</p>;
   }
+
   return (
     <div className="container mx-auto p-6">
+      <ToastContainer />
       <h2 className="text-2xl font-bold mb-4">🛒 Shopping Cart</h2>
 
       {cart.cartItems.length > 0 ? (
@@ -134,7 +162,7 @@ const Cart = () => {
               />
               <div className="ml-4 flex-1">
                 <h3 className="text-lg">{item.name}</h3>
-                <p className="text-gray-500">${item.price.toFixed(2)}</p>
+                <p className="text-gray-500">${item.price?.toFixed(2)}</p>
 
                 <div className="flex mt-2">
                   <button
@@ -167,17 +195,27 @@ const Cart = () => {
           ))}
 
           <h3 className="text-xl font-bold mt-4">
-            💰 Total: ${cart.totalAmount.toFixed(2)}
+            💰 Total: ${cart.totalAmount?.toFixed(2)}
           </h3>
 
           <div className="mt-4 flex">
-            <input
-              type="text"
-              placeholder="Enter coupon code"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
+            <select
+              value={selectedCoupon}
+              onChange={(e) => setSelectedCoupon(e.target.value)}
               className="border p-2 flex-1 rounded"
-            />
+            >
+              <option value="">-- Select Coupon --</option>
+              {availableCoupons.length > 0 ? (
+                availableCoupons.map((coupon) => (
+                  <option key={coupon._id} value={coupon.code}>
+                    {coupon.code.toUpperCase()} - {coupon.discountPercentage}%
+                    Off
+                  </option>
+                ))
+              ) : (
+                <option disabled>No coupons available</option>
+              )}
+            </select>
             <button
               onClick={handleApplyCoupon}
               className="ml-2 bg-green-500 text-white px-3 py-2 rounded"

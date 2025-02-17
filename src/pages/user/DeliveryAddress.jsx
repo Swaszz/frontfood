@@ -66,6 +66,7 @@ function DeliveryAddress() {
         isDefault: false,
       });
       setEditingId(null);
+      dispatch(fetchAddresses());
     } catch (error) {
       toast.error(error || "Error saving address");
     }
@@ -111,7 +112,7 @@ function DeliveryAddress() {
       console.log(" Order is set, Navigating to Order Page...");
       navigate("/user/order");
     } else {
-      console.warn("⚠️ Order items are still empty, waiting for update...");
+      console.warn("Order items are still empty, waiting for update...");
     }
   }, [orderState?.order?.orderItems?.length, navigate]);
   const handleDeliverToThisAddress = async () => {
@@ -138,13 +139,13 @@ function DeliveryAddress() {
       })
     );
 
-    console.log("🔄 Waiting for Redux to update...");
+    console.log(" Waiting for Redux to update...");
   };
 
   return (
     <div className="container mx-auto max-w-4xl p-6">
       <ToastContainer />
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+      <h1 className="text-3xl font-bold text-black-800 mb-6 text-center">
         Delivery Addresses
       </h1>
 
@@ -229,7 +230,7 @@ function DeliveryAddress() {
         <p className="text-red-500">{error}</p>
       ) : (
         <div className="mt-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          <h2 className="text-xl font-semibold text-black-800 mb-4">
             Saved Addresses
           </h2>
           {addresses.length === 0 ? (

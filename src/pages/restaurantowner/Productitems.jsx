@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axiosInstance";
 
-function ProductItem() {
+function ProductItems() {
   const { query } = useParams();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -81,4 +81,4 @@ function ProductItem() {
   );
 }
 
-export default ProductItem;
+export default ProductItems;

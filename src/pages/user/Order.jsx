@@ -7,7 +7,8 @@ import {
   //updateOrderStatus,
 } from "../../redux/features/orderSlice";
 import axiosInstance from "../../config/axiosInstance";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Order() {
   const dispatch = useDispatch();
@@ -20,15 +21,16 @@ function Order() {
   useEffect(() => {
     dispatch(fetchOrderSummary());
   }, [dispatch]);
+
   useEffect(() => {
     console.log(
-      "🛒 Current Redux Order State Before Placing Order:",
+      "Current Redux Order State Before Placing Order:",
       orderState.order
     );
   }, [orderState.order]);
 
   const handlePlaceOrder = async () => {
-    console.log("🛒 Placing Order with:", orderState.order);
+    console.log("Placing Order with:", orderState.order);
 
     try {
       const response = await axiosInstance.post("/order/placeorder", {
@@ -57,6 +59,12 @@ function Order() {
   };
 
   const handleCancelOrder = async () => {
+    if (!order || !order._id) {
+      return;
+    }
+
+    console.log("Canceling Order ID:", order._id);
+
     try {
       const response = await axiosInstance.delete("/order/cancelorder", {
         data: { orderId: order._id },
@@ -64,10 +72,12 @@ function Order() {
 
       if (response.data.success) {
         dispatch(clearOrder());
-        alert("Order Cancelled");
+        toast.success("order cancelled sucessfully");
+        dispatch(fetchOrderSummary());
       }
     } catch (error) {
       console.error("Error cancelling order:", error);
+      toast.error("failed to cancel order");
     }
   };
 
@@ -78,6 +88,7 @@ function Order() {
 
   return (
     <div className="container mx-auto p-6">
+      <ToastContainer />
       <h1 className="text-3xl font-bold mb-6 text-center">Order Summary</h1>
 
       <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -114,10 +125,6 @@ function Order() {
             <p className="text-gray-500">No delivery address selected.</p>
           )}
         </div>
-
-        <h2 className="text-lg font-semibold mt-4">
-          Restaurant: {order.restaurant?.name || "Unknown"}
-        </h2>
 
         <h3 className="text-xl font-bold mt-4">
           Total Price: ${order.totalAmount.toFixed(2)}
