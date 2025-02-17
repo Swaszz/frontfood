@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import DarkMode from "../shared/Darkmode";
+import DarkMode from "../../shared/Darkmode";
 
 function UserHeader() {
   const navigate = useNavigate();

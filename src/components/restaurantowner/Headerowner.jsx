@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import DarkMode from "../shared/Darkmode";
+import DarkMode from "../../shared/Darkmode";
 
 function Headerowner() {
   const navigate = useNavigate();
