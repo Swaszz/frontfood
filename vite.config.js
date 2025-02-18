@@ -7,6 +7,9 @@ export default defineConfig({
   
   plugins: [react(),],
   server: {
-    historyApiFallback: true, // ✅ Ensures Vite handles route fallback
+    port: 5173, 
+    strictPort: true, 
+    cors: true, // ✅ 
+    historyApiFallback: true, 
   },
 })
