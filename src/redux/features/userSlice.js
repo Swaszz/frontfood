@@ -18,15 +18,15 @@ export const userSlice = createSlice({
 
     clearUser: (state) => {
       state.isUserAuth = false;
-      state.userData = {}; 
+      state.userData = null; 
       localStorage.removeItem("userData"); 
       localStorage.removeItem("userInfo"); 
     },
 
     setUser: (state, action) => {
-      state.userInfo = action.payload;
+      state.userData = action.payload;
       state.isUserAuth = true;
-      localStorage.setItem("userInfo", action.payload);
+      localStorage.setItem("userData", action.payload);
     },
 
     setUserData: (state, action) => {
@@ -44,8 +44,8 @@ export const userSlice = createSlice({
     logoutUser: (state) => {
       state.isUserAuth = false;
       state.userData = null;
-      localStorage.removeItem("userData");
-      localStorage.removeItem("userInfo");
+      localStorage.removeItem("userData");  
+    localStorage.removeItem("token");     
     },
   },
 });

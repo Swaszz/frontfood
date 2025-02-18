@@ -29,8 +29,8 @@ const Login = ({ role }) => {
   const onSubmit = async (data) => {
     try {
       const response = await axiosInstance.put(user.loginAPI, data);
+      localStorage.setItem("token", response?.data?.token);
 
-      localStorage.setItem("token", response.data.token);
       dispatch(saveUser(response?.data?.data));
 
       toast.success("Login Successful! Redirecting...", {
