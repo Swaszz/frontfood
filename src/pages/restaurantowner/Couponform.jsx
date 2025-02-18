@@ -69,10 +69,12 @@ function Couponform() {
 
   const handleDelete = async (id) => {
     try {
-      await axiosInstance.delete(`/coupon/delete/${id}`);
+      await axiosInstance.delete(`/coupon/delete/${id}`, {
+        withCredentials: true,
+      });
       toast.success("✅ Coupon deleted successfully!");
 
-      setCoupons(coupons.filter((c) => c._id !== id));
+      setCoupons((prevCoupons) => prevCoupons.filter((c) => c._id !== id));
     } catch (error) {
       console.error("❌ Error deleting coupon:", error);
       toast.error("❌ Failed to delete coupon.");

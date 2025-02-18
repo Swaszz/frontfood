@@ -93,7 +93,7 @@ function Profiles() {
         dispatch(clearUser());
 
         setTimeout(() => {
-          navigate("/restaurantowner/login", { replace: true }); // ✅ Corrected Navigation
+          navigate("/restaurantowner/login", { replace: true });
         }, 200);
       }
     } catch (error) {

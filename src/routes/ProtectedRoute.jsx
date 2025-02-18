@@ -5,15 +5,17 @@ import { useSelector } from "react-redux";
 function ProtectedRoute({ role, children }) {
   const navigate = useNavigate();
 
-  const isUserAuth =
-    useSelector((state) => state.user.isUserAuth) ||
-    localStorage.getItem("token");
+  const isUserAuth = useSelector((state) => state.user.isUserAuth);
+
   const isOwnerAuth = useSelector((state) => state.owner.isOwnerAuth);
   const isAdminAuth = useSelector((state) => state.admin.isAdminAuth);
 
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
+    if (isUserAuth === null || isOwnerAuth === null || isAdminAuth === null) {
+      return;
+    }
     const isAuthenticated =
       (role === "user" && isUserAuth) ||
       (role === "restaurantowner" && isOwnerAuth) ||

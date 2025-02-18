@@ -10,9 +10,11 @@ const Restaurantform = () => {
     address: "",
     phone: "",
     email: "",
-    restaurantOwner: "",
   });
   const [editingId, setEditingId] = useState(null);
+
+  // Get restaurantownerId from localStorage
+  const restaurantownerId = localStorage.getItem("restaurantownerId");
 
   useEffect(() => {
     fetchRestaurants();
@@ -35,8 +37,17 @@ const Restaurantform = () => {
   const addRestaurant = async (e) => {
     e.preventDefault();
 
+    if (!restaurantownerId) {
+      toast.error("❌ Error: No restaurantownerId found. Please log in.");
+      return;
+    }
+
     try {
-      await axiosInstance.post("/restaurant/addrestaurant", restaurant);
+      await axiosInstance.post("/restaurant/addrestaurant", {
+        restaurantownerId, // ✅ Ensure owner ID is included in request
+        ...restaurant,
+      });
+
       toast.success("✅ Restaurant created successfully!");
       fetchRestaurants();
       setRestaurant({
@@ -44,7 +55,6 @@ const Restaurantform = () => {
         address: "",
         phone: "",
         email: "",
-        restaurantOwner: "",
       });
     } catch (error) {
       console.error(
@@ -56,21 +66,28 @@ const Restaurantform = () => {
   };
 
   const handleEdit = (restaurant) => {
-    setRestaurant(restaurant);
+    setRestaurant({
+      name: restaurant.name,
+      address: restaurant.address,
+      phone: restaurant.phone,
+      email: restaurant.email,
+    });
     setEditingId(restaurant._id);
   };
 
   const handleUpdate = async () => {
+    if (!editingId) return;
+
     try {
       await axiosInstance.put(`/restaurant/updaterestaurant/${editingId}`, {
+        restaurantownerId, // ✅ Include owner ID during update
         name: restaurant.name,
         address: restaurant.address,
         phone: restaurant.phone,
         email: restaurant.email,
-        restaurantOwner: restaurant.restaurantOwner,
       });
 
-      toast.success("Restaurant updated successfully!");
+      toast.success("✅ Restaurant updated successfully!");
       fetchRestaurants();
       setEditingId(null);
       setRestaurant({
@@ -78,24 +95,23 @@ const Restaurantform = () => {
         address: "",
         phone: "",
         email: "",
-        restaurantOwner: "",
       });
     } catch (error) {
       console.error(
         "Error updating restaurant:",
         error.response?.data || error.message
       );
-      toast.error(" Error updating restaurant");
+      toast.error("❌ Error updating restaurant");
     }
   };
 
   const deleteRestaurant = async (id) => {
     try {
       await axiosInstance.delete(`/restaurant/deleterestaurant/${id}`);
-      toast.success("Restaurant deleted successfully!");
+      toast.success("✅ Restaurant deleted successfully!");
       fetchRestaurants();
     } catch (error) {
-      toast.error("Error deleting restaurant");
+      toast.error("❌ Error deleting restaurant");
     }
   };
 
@@ -119,6 +135,7 @@ const Restaurantform = () => {
         </ul>
       </aside>
 
+      {/* Main Content */}
       <main className="w-full md:w-3/4 p-6">
         <h1 className="text-2xl font-bold mb-4">Restaurant Management</h1>
 
@@ -162,15 +179,6 @@ const Restaurantform = () => {
             onChange={handleInputChange}
             required
           />
-          <input
-            type="text"
-            name="restaurantOwner"
-            placeholder="Restaurant Owner"
-            className="input input-bordered w-full mb-2"
-            value={restaurant.restaurantOwner}
-            onChange={handleInputChange}
-            required
-          />
 
           <button className="btn btn-primary w-full" type="submit">
             Create Restaurant
@@ -187,7 +195,6 @@ const Restaurantform = () => {
                 <th className="border p-2">Address</th>
                 <th className="border p-2">Phone</th>
                 <th className="border p-2">Email</th>
-                <th className="border p-2">Owner</th>
                 <th className="border p-2">Actions</th>
               </tr>
             </thead>
@@ -198,7 +205,6 @@ const Restaurantform = () => {
                   <td className="border p-2">{r.address}</td>
                   <td className="border p-2">{r.phone}</td>
                   <td className="border p-2">{r.email}</td>
-                  <td className="border p-2">{r.restaurantOwner || "N/A"}</td>
                   <td className="border p-2">
                     {editingId === r._id ? (
                       <button

@@ -1,10 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userData: localStorage.getItem("userData") || null, 
-  isAuthenticated: localStorage.getItem("userData"),  
-  loading: false,
-  error: null,
+  userData: {},
+ isUserAuth:false,
+ 
 };
 export const userSlice = createSlice({
   name: "user",
@@ -20,7 +19,7 @@ export const userSlice = createSlice({
       state.isUserAuth = false;
       state.userData = null; 
       localStorage.removeItem("userData"); 
-      localStorage.removeItem("userInfo"); 
+      localStorage.removeItem("token"); 
     },
 
     setUser: (state, action) => {

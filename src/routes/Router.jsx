@@ -165,7 +165,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "createcoupon",
+        path: "updateorder",
         element: (
           <ProtectedRoute role="restaurantowner">
             <Orderform />

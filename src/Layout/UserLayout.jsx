@@ -23,21 +23,20 @@ const UserLayout = () => {
 
   const checkUser = async () => {
     try {
-      const response = await axiosInstance({
-        method: "GET",
-        url: "/user/checkuser",
-      });
+      const response = await axiosInstance.get("/user/checkuser");
       console.log(response);
-      dispatch(saveUser());
+      dispatch(saveUser(response.data));
+      localStorage.setItem("isUserAuth", "true");
     } catch (error) {
       dispatch(clearUser());
+      localStorage.removeItem("isUserAuth");
       console.log(error);
     }
   };
 
   useEffect(() => {
     checkUser();
-  }, [location.pathname]);
+  }, [location.pathname, isUserAuth]);
 
   return (
     <div>
