@@ -29,15 +29,9 @@ const Login = ({ role }) => {
   const onSubmit = async (data) => {
     try {
       const response = await axiosInstance.put(user.loginAPI, data);
-      const { token, data: userData } = response?.data;
+
       localStorage.setItem("token", response?.data?.token);
-      if (userData.role === "user") {
-        localStorage.setItem("userId", userData.id);
-      } else if (userData.role === "restaurantowner") {
-        localStorage.setItem("restaurantownerId", userData.id);
-      } else if (userData.role === "admin") {
-        localStorage.setItem("adminId", userData.id);
-      }
+
       dispatch(saveUser(response?.data?.data));
 
       toast.success("Login Successful! Redirecting...", {

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { loadStripe } from "@stripe/stripe-js";
-import useFetch from "../hooks/useFetch"; // Custom hook to fetch data
-import axiosInstance from "../config/axiosInstance";
+import useFetch from "../../hooks/useFetch";
+import axiosInstance from "../../config/axiosInstance";
 import "react-toastify/dist/ReactToastify.css";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
