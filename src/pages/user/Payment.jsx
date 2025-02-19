@@ -1,23 +1,18 @@
-import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import { loadStripe } from "@stripe/stripe-js";
-import { clearError } from "../../redux/features/PaymentSlice";
-
+import useFetch from "../hooks/useFetch"; // Custom hook to fetch data
+import axiosInstance from "../config/axiosInstance";
+import "react-toastify/dist/ReactToastify.css";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Payment = () => {
-  const dispatch = useDispatch();
-  const { cartItems } = useSelector((state) => state.cart); // Fetch items from Redux store
+  const [order, isLoading, error] = useFetch("/user/orders/latest"); // Fetch latest pending order
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    dispatch(clearError()); // Clear errors when component mounts
-  }, [dispatch]);
-
   const handlePayment = async () => {
-    if (!cartItems || cartItems.length === 0) {
-      toast.error("Your cart is empty.");
+    if (!order) {
+      toast.error("No pending orders available for payment.");
       return;
     }
 
@@ -26,32 +21,17 @@ const Payment = () => {
     try {
       const stripe = await stripePromise;
 
-      const items = cartItems.map((item) => ({
-        menuItemId: { name: item.name, price: item.price, image: item.image },
-        quantity: item.quantity,
-      }));
-
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/user/payment/create-checkout-session`,
+      // Call backend to create Stripe checkout session
+      const response = await axiosInstance.post(
+        "/user/payment/create-checkout-session",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // Ensure authentication
-          body: JSON.stringify({ items }),
+          orderId: order._id,
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to create payment session");
-      }
-
-      const result = await response.json();
-
-      if (result.sessionId) {
+      if (response.data.sessionId) {
         const { error } = await stripe.redirectToCheckout({
-          sessionId: result.sessionId,
+          sessionId: response.data.sessionId,
         });
 
         if (error) {
@@ -69,15 +49,40 @@ const Payment = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-lg bg-white shadow-md rounded-lg text-center">
+      <ToastContainer />
+
       <h2 className="text-2xl font-bold mb-4">Complete Your Payment</h2>
 
-      <button
-        className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all disabled:bg-gray-400"
-        onClick={handlePayment}
-        disabled={loading}
-      >
-        {loading ? "Processing..." : "Make Payment"}
-      </button>
+      {isLoading ? (
+        <p className="text-gray-600">Loading order details...</p>
+      ) : error ? (
+        <p className="text-red-600">Error fetching order: {error.message}</p>
+      ) : order ? (
+        <>
+          <div className="mb-4 text-left">
+            <p>
+              <strong>Order ID:</strong> {order._id}
+            </p>
+            <p>
+              <strong>Total Amount:</strong> ₹{order.totalPrice}
+            </p>
+            <p>
+              <strong>Status:</strong> {order.status}
+            </p>
+          </div>
+          <button
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all disabled:bg-gray-400"
+            onClick={handlePayment}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Pay Now"}
+          </button>
+        </>
+      ) : (
+        <p className="text-gray-600">
+          No pending orders available for payment.
+        </p>
+      )}
     </div>
   );
 };
