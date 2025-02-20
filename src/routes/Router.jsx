@@ -17,17 +17,19 @@ import ErrorPage from "../pages/shared/ErrorPage";
 import OwnerLayout from "../Layout/OwnerLayout";
 import Profiles from "../pages/restaurantowner/Profiles";
 import Ownerhome from "../pages/restaurantowner/Ownerhome";
-import ScrollToTop from "../components/ScrollToTop";
+//import ScrollToTop from "../components/ScrollToTop";
 import { Outlet } from "react-router-dom";
 import Menuitemform from "../pages/restaurantowner/Menuitemform";
 import Restaurantform from "../pages/restaurantowner/Restaurantform";
+import Menudetailsform from "../pages/restaurantowner/Menudetailsform";
 import Couponform from "../pages/restaurantowner/Couponform";
 import Categorypage from "../pages/user/Categorypage";
 import Categorypages from "../pages/restaurantowner/Categorypages";
 import Payment from "../pages/user/Payment";
 import Orderform from "../pages/restaurantowner/Orderform";
 import ProductItems from "../pages/restaurantowner/Productitems";
-<ScrollToTop />;
+import UpdateMenuform from "../pages/restaurantowner/Updatemenuform";
+
 const router = createBrowserRouter([
   {
     path: "",
@@ -153,6 +155,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute role="restaurantowner">
             <Menuitemform />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "selectmenu",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <Menudetailsform />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "updatemenu/:id",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <UpdateMenuform />
           </ProtectedRoute>
         ),
       },

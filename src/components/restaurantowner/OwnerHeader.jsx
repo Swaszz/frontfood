@@ -51,7 +51,10 @@ function OwnerHeader() {
               <Link to={"/restaurantowner/signup"}>SIGNUP</Link>
             </li>
             <li>
-              <Link to={"/restaurantowner/addrestaurant"}>MENU</Link>
+              <Link to={"/restaurantowner/addrestaurant"}>RESTAURANT</Link>
+            </li>
+            <li>
+              <Link to={"/restaurantowner/createmenu"}>MENU</Link>
             </li>
             <li>
               <Link to={"/restaurantowner/createcoupon"}>COUPON</Link>

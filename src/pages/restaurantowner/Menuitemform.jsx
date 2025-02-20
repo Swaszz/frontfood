@@ -1,276 +1,237 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axiosInstance";
-import { toast } from "react-toastify";
-
+import "react-toastify/dist/ReactToastify.css";
+import { Link, useNavigate } from "react-router-dom";
 function Menuitemform() {
-  const [menuItem, setMenuItem] = useState({
+  const navigate = useNavigate();
+  const [menuData, setMenuData] = useState({
     name: "",
     description: "",
     price: "",
     category: "",
     availability: true,
-    restaurantName: "",
-    image: null,
+    restaurantId: "",
   });
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [restaurants, setRestaurants] = useState([]);
 
-  const [menuItems, setMenuItems] = useState([]); // ✅ Store menu items for this restaurant only
-  const [editMode, setEditMode] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [restaurantId, setRestaurantId] = useState(null); // ✅ Store restaurantId for API
-
-  // ✅ Fetch the logged-in restaurant's details
   useEffect(() => {
-    const fetchRestaurantMenu = async () => {
-      try {
-        const res = await axiosInstance.get("/restaurant/getrestaurant");
-        if (res.data?.data) {
-          const id = res.data.data._id;
-          setRestaurantId(id);
-
-          setMenuItem((prev) => ({
-            ...prev,
-            restaurantName: res.data.data.name, // Pre-fill restaurant name
-          }));
-
-          if (id) {
-            const menuResponse = await axiosInstance.get(
-              `/menuitem/getmenu/${id}`
-            );
-            if (menuResponse.data?.data) {
-              setMenuItems(menuResponse.data.data);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching restaurant data:", error);
-      }
-    };
-
-    fetchRestaurantMenu();
+    fetchRestaurants();
   }, []);
 
-  // ✅ Handle Input Changes
+  const fetchRestaurants = async () => {
+    try {
+      const response = await axiosInstance.get("/restaurant/getrestaurant");
+      setRestaurants(response.data.data);
+    } catch (error) {
+      toast.error("Error fetching restaurants.");
+    }
+  };
+
   const handleChange = (e) => {
-    setMenuItem({ ...menuItem, [e.target.name]: e.target.value });
+    setMenuData({ ...menuData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Handle Image Selection
-  const handleFileChange = (e) => {
-    setMenuItem({ ...menuItem, image: e.target.files[0] });
+  const handleImageUpload = (e) => {
+    setImage(e.target.files[0]);
   };
 
-  // ✅ Handle Create or Update Menu Item
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!restaurantId) {
-      toast.error("❌ Error: Restaurant ID is missing!");
-      return;
-    }
-
-    const formData = new FormData();
-    Object.keys(menuItem).forEach((key) => {
-      if (menuItem[key] !== null) {
-        formData.append(key, menuItem[key]);
-      }
-    });
-
-    formData.append("restaurantId", restaurantId); // ✅ Ensure restaurantId is included
+    setLoading(true);
 
     try {
-      if (editMode) {
-        await axiosInstance.put(
-          `/menuitem/updatemenu/${menuItem._id}`,
-          formData
-        );
-        toast.success("✅ Menu item updated successfully!");
-      } else {
-        await axiosInstance.post("/menuitem/createmenu", formData);
-        toast.success("✅ Menu item created successfully!");
+      const formData = new FormData();
+      formData.append("name", menuData.name);
+      formData.append("description", menuData.description);
+      formData.append("price", menuData.price);
+      formData.append("category", menuData.category);
+      formData.append("availability", menuData.availability);
+      formData.append("restaurantId", menuData.restaurantId);
+
+      if (image) {
+        formData.append("image", image);
       }
 
-      setEditMode(false);
-      setSelectedItem(null);
-      setMenuItem({
+      await axiosInstance.post("/menuitem/createmenu", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success(" Menu item created successfully!");
+      setMenuData({
         name: "",
         description: "",
         price: "",
         category: "",
         availability: true,
-        restaurantName: menuItem.restaurantName,
-        image: null,
+        restaurantId: "",
       });
-
-      // ✅ Refresh menu items list
-      const menuResponse = await axiosInstance.get(
-        `/menuitem/getmenu/${restaurantId}`
-      );
-      if (menuResponse.data?.data) {
-        setMenuItems(menuResponse.data.data);
-      }
+      setImage(null);
     } catch (error) {
-      console.error(
-        "❌ Error saving menu item:",
-        error.response?.data || error
-      );
-      toast.error(error.response?.data?.message || "❌ Error saving menu item");
-    }
-  };
-
-  // ✅ Handle Delete Menu Item
-  const handleDelete = async (id) => {
-    try {
-      await axiosInstance.delete(`/menuitem/deletemenu/${id}`);
-      toast.success("✅ Menu item deleted successfully!");
-
-      setMenuItems(menuItems.filter((item) => item._id !== id));
-    } catch (error) {
-      console.error("❌ Error deleting menu item:", error);
-      toast.error("❌ Failed to delete menu item.");
+      console.error("Error creating menu item:", error);
+      toast.error(error.response?.data?.message || "Error creating menu item");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg max-w-5xl mx-auto">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        Manage Your Menu Items
-      </h2>
+    <div className="flex flex-col md:flex-row h-screen transition-all duration-300">
+      <ToastContainer />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ✅ Left Box: Fetched Menu Items */}
-        <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-4">Your Menu Items</h3>
+      <aside className="w-full md:w-1/4 p-6 bg-gray-900 text-white dark:bg-gray-800 shadow-lg">
+        <h2 className="text-xl font-semibold mb-4">Manage</h2>
+        <ul className="space-y-3">
+          <li>
+            <Link
+              to="/restaurantowner/addrestaurant"
+              className="block hover:text-gray-400"
+            >
+              Restaurant
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/restaurantowner/createcoupon"
+              className="block hover:text-gray-400"
+            >
+              Coupons
+            </Link>
+          </li>
+        </ul>
+      </aside>
 
-          {menuItems.length > 0 ? (
-            menuItems.map((item) => (
-              <div
-                key={item._id}
-                className="border p-4 mb-4 rounded-lg shadow-sm flex justify-between items-center"
-              >
-                <div>
-                  <p>
-                    <strong>Name:</strong> {item.name}
-                  </p>
-                  <p>
-                    <strong>Category:</strong> {item.category}
-                  </p>
-                  <p>
-                    <strong>Price:</strong> ${item.price}
-                  </p>
-                  <p>
-                    <strong>Availability:</strong>{" "}
-                    {item.availability ? "✅ Available" : "❌ Not Available"}
-                  </p>
-                </div>
+      <main className="flex-1 p-6 bg-gray-50 dark:bg-black transition-colors duration-300 flex justify-center items-center">
+        <div className="w-full max-w-3xl bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-white">
+            Create New Menu Item
+          </h2>
 
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      setSelectedItem(item);
-                      setEditMode(true);
-                      setMenuItem(item);
-                    }}
-                  >
-                    Edit ✏️
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-error"
-                    onClick={() => handleDelete(item._id)}
-                  >
-                    ❌ Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No menu items added yet.</p>
-          )}
-        </div>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={menuData.name}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full bg-gray-200 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
 
-        {/* ✅ Right Box: Create/Edit Form */}
-        <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-4">
-            {editMode ? "Edit Menu Item" : "Create New Menu Item"}
-          </h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={menuData.description}
+                onChange={handleChange}
+                required
+                className="textarea textarea-bordered w-full bg-gray-200 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Menu Item Name"
-              value={menuItem.name}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Price (₹)
+              </label>
+              <input
+                type="number"
+                name="price"
+                value={menuData.price}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full bg-gray-200 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
 
-            <textarea
-              name="description"
-              placeholder="Description"
-              value={menuItem.description}
-              onChange={handleChange}
-              className="textarea textarea-bordered w-full"
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Category
+              </label>
+              <input
+                type="text"
+                name="category"
+                value={menuData.category}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full bg-gray-200 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
 
-            <input
-              type="number"
-              name="price"
-              placeholder="Price"
-              value={menuItem.price}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
-
-            <input
-              type="text"
-              name="category"
-              placeholder="Category"
-              value={menuItem.category}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
-
-            <input
-              type="text"
-              name="restaurantName"
-              placeholder="Restaurant Name"
-              value={menuItem.restaurantName}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              required
-            />
-
-            <label className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Available
+              </label>
               <input
                 type="checkbox"
                 name="availability"
-                checked={menuItem.availability}
+                checked={menuData.availability}
                 onChange={(e) =>
-                  setMenuItem({ ...menuItem, availability: e.target.checked })
+                  handleChange({
+                    target: { name: "availability", value: e.target.checked },
+                  })
                 }
+                className="checkbox"
               />
-              <span>Available</span>
-            </label>
+            </div>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="file-input file-input-bordered w-full"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Select Restaurant
+              </label>
+              <select
+                name="restaurantId"
+                value={menuData.restaurantId}
+                onChange={handleChange}
+                required
+                className="select select-bordered w-full bg-gray-200 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">Choose a restaurant</option>
+                {restaurants.map((restaurant) => (
+                  <option key={restaurant._id} value={restaurant._id}>
+                    {restaurant.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <button type="submit" className="btn btn-primary w-full">
-              {editMode ? "Update Menu Item" : "Create Menu Item"}
-            </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Upload Image
+              </label>
+              <input
+                type="file"
+                onChange={handleImageUpload}
+                className="file-input w-full bg-gray-200 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                type="submit"
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg shadow-md transition-all"
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create Menu Item"}
+              </button>
+              <button
+                type="button"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg shadow-md transition-all"
+                onClick={() => navigate("/restaurantowner/selectmenu")}
+              >
+                ✏️ Edit
+              </button>
+            </div>
           </form>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -59,7 +59,7 @@ const Cart = () => {
     };
 
     fetchCartData();
-  }, [dispatch, cart]);
+  }, [dispatch]);
 
   const handleUpdateQuantity = async (menuItemId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -106,7 +106,6 @@ const Cart = () => {
       toast.error("Failed to clear cart. Please try again!");
     }
   };
-
   const handleApplyCoupon = async () => {
     try {
       if (!selectedCoupon) {
@@ -132,6 +131,7 @@ const Cart = () => {
     }
   };
 
+  
   const handleProceedToCheckout = async () => {
     try {
       await axiosInstance.post("/cart/checkout", { cartId: cart?.cartId });

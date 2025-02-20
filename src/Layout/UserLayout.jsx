@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearUser, saveUser } from "../redux/features/userSlice";
 import { useState } from "react";
 import SearchResults from "../components/shared/SearchResults";
-
+import ScrollToTop from "../components/ScrollToTop";
 const UserLayout = () => {
   const { isUserAuth, userData } = useSelector((state) => state.user);
   console.log(userData);
@@ -40,6 +40,7 @@ const UserLayout = () => {
 
   return (
     <div>
+      <ScrollToTop />
       {isUserAuth ? (
         <UserHeader onSearch={handleSearch} />
       ) : (

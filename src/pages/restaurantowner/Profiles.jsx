@@ -47,11 +47,11 @@ function Profiles() {
         console.log("✅ Profile Data Fetched:", response.data);
         setProfileData(response.data.data);
       } catch (err) {
-        console.error("❌ Error Fetching Profile:", err);
+        console.error(" Error Fetching Profile:", err);
         setError(err.response?.data?.message || "Failed to fetch profile");
 
         if (err.response?.status === 401) {
-          console.log("❌ Unauthorized: Redirecting to login");
+          console.log(" Unauthorized: Redirecting to login");
           localStorage.removeItem("token");
           dispatch(clearUser());
           navigate("/restaurantowner/login");
@@ -97,7 +97,7 @@ function Profiles() {
         }, 200);
       }
     } catch (error) {
-      console.error("❌ Logout failed:", error.response?.data || error.message);
+      console.error(" Logout failed:", error.response?.data || error.message);
     }
   };
   return (

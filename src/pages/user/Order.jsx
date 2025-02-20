@@ -1,11 +1,7 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import {
-  fetchOrderSummary,
-  clearOrder,
-  //updateOrderStatus,
-} from "../../redux/features/OrderSlice";
+import { fetchOrderSummary } from "../../redux/features/OrderSlice";
 import axiosInstance from "../../config/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -55,29 +51,6 @@ function Order() {
         error.response?.data || error.message
       );
       toast.error("Failed to place order. Please try again.");
-    }
-  };
-
-  const handleCancelOrder = async () => {
-    if (!order || !order._id) {
-      return;
-    }
-
-    console.log("Canceling Order ID:", order._id);
-
-    try {
-      const response = await axiosInstance.delete("/order/cancelorder", {
-        data: { orderId: order._id },
-      });
-
-      if (response.data.success) {
-        dispatch(clearOrder());
-        toast.success("order cancelled sucessfully");
-        dispatch(fetchOrderSummary());
-      }
-    } catch (error) {
-      console.error("Error cancelling order:", error);
-      toast.error("failed to cancel order");
     }
   };
 
@@ -135,20 +108,12 @@ function Order() {
           </p>
         )}
 
-        <div className="mt-6 flex justify-between">
-          <button
-            onClick={handleCancelOrder}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-          >
-            Cancel Order
-          </button>
-          <button
-            onClick={handlePlaceOrder}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-          >
-            Place Order
-          </button>
-        </div>
+        <button
+          onClick={handlePlaceOrder}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+        >
+          Place Order
+        </button>
       </div>
     </div>
   );

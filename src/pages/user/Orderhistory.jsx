@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchOrderHistory } from "../../redux/features/OrderSlice";
+
 const OrderHistory = () => {
   const dispatch = useDispatch();
   const { orderHistory, loading, error } = useSelector((state) => state.order);
 
   useEffect(() => {
+    console.log("Fetching order history..."); // ✅ Debugging
     dispatch(fetchOrderHistory());
   }, [dispatch]);
+
+  console.log("Fetched Orders:", orderHistory); // ✅ Debugging
 
   return (
     <div className="container mx-auto p-5">
@@ -36,7 +40,9 @@ const OrderHistory = () => {
                   <td className="border p-2">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="border p-2">${order.totalPrice.toFixed(2)}</td>
+                  <td className="border p-2">
+                    ${order.totalPrice?.toFixed(2)}
+                  </td>
                   <td className="border p-2">{order.status}</td>
                 </tr>
               ))}

@@ -7,7 +7,7 @@ import OwnerHeader from "../components/restaurantowner/OwnerHeader";
 import Headerowner from "../components/restaurantowner/Headerowner";
 import Footers from "../components/restaurantowner/Footers";
 import SearchResults from "../components/shared/SearchResults";
-
+import ScrollToTop from "../components/ScrollToTop";
 const OwnerLayout = () => {
   const { isOwnerAuth, ownerData } = useSelector((state) => state.owner);
   console.log("Owner Data:", ownerData);
@@ -42,6 +42,7 @@ const OwnerLayout = () => {
 
   return (
     <div>
+      <ScrollToTop />
       {isOwnerAuth ? (
         <OwnerHeader onSearch={handleSearch} />
       ) : (

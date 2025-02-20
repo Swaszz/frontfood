@@ -149,7 +149,6 @@ function DeliveryAddress() {
         Delivery Addresses
       </h1>
 
-      {/* Address Form */}
       <form
         onSubmit={handleSaveAddress}
         className="bg-white p-6 rounded-lg shadow-lg"
@@ -225,7 +224,6 @@ function DeliveryAddress() {
         </div>
       </form>
 
-      {/* Loading & Error Handling */}
       {isLoading ? (
         <p>Loading...</p>
       ) : error ? (

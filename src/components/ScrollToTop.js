@@ -5,10 +5,11 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0); 
+    console.log("🔵 ScrollToTop triggered for path:", pathname); 
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
   }, [pathname]);
 
-  return null; 
+  return null;
 };
 
 export default ScrollToTop;
