@@ -4,7 +4,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import axiosInstance from "../../config/axiosInstance";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+//const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Payment = () => {
   const [order, setOrder] = useState(null);
@@ -42,8 +42,9 @@ const Payment = () => {
   }, []);
 
   // ✅ Handle Payment
+  /*
   const handlePayment = async () => {
-    if (!order) {
+    if (!order || !order._id) {
       toast.error("No pending orders available for payment.");
       return;
     }
@@ -55,15 +56,13 @@ const Payment = () => {
       const stripe = await stripePromise;
 
       const response = await axiosInstance.post(
-        "/user/payment/create-checkout-session",
-        {
-          orderId: order._id,
-        }
+        "/payment/create-checkout-session", // ✅ Match backend route
+        { orderId: order._id }
       );
 
       console.log("✅ Stripe Session Response:", response.data);
 
-      if (response.data.sessionId) {
+      if (response.data && response.data.sessionId) {
         const { error } = await stripe.redirectToCheckout({
           sessionId: response.data.sessionId,
         });
@@ -72,6 +71,9 @@ const Payment = () => {
           console.error("❌ Stripe Checkout Error:", error);
           toast.error("Failed to process payment.");
         }
+      } else {
+        console.error("❌ No session ID received from backend:", response.data);
+        toast.error("Could not initiate payment session.");
       }
     } catch (error) {
       console.error("❌ Payment Error:", error.response?.data || error.message);
@@ -80,7 +82,44 @@ const Payment = () => {
       setLoading(false);
     }
   };
+  */
 
+  const handlePayment = async () => {
+    if (!order || !order._id) {
+      toast.error("No pending orders available for payment.");
+      return;
+    }
+
+    console.log("🟡 Processing Payment for Order:", order);
+    setLoading(true);
+
+    try {
+      const stripe = await loadStripe(
+        import.meta.env.VITE_STRIPE_Publishable_key
+      );
+
+      const { data } = await axiosInstance.post(
+        "/payment/create-checkout-session",
+        {
+          orderId: order._id,
+        }
+      );
+
+      console.log("✅ Stripe Session Response:", data);
+
+      if (data?.sessionId) {
+        await stripe.redirectToCheckout({ sessionId: data.sessionId }); // ✅ Stripe Redirection
+      } else {
+        console.error("❌ No session ID received from backend:", data);
+        toast.error("Payment session could not be initiated.");
+      }
+    } catch (error) {
+      console.error("❌ Payment Error:", error.response?.data || error.message);
+      toast.error("An error occurred while processing payment.");
+    } finally {
+      setLoading(false);
+    }
+  };
   // ✅ Handle Order Cancellation
   const handleCancelOrder = async () => {
     if (!order || !order._id) {
