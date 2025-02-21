@@ -18,9 +18,12 @@ export const fetchOrderHistory = createAsyncThunk(
   "order/fetchOrderHistory",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/order/history");
+      const response = await axiosInstance.get("/order/history", {
+        withCredentials: true, 
+      });
+
+      console.log("Fetched Order History API Response:", response.data);
       
-      console.log("Fetched Order History API Response:", response.data); 
       if (Array.isArray(response.data)) {
         return response.data; 
       } else if (Array.isArray(response.data.data)) {

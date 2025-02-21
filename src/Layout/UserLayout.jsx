@@ -39,7 +39,7 @@ const UserLayout = () => {
   }, [location.pathname, isUserAuth]);
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       {isUserAuth ? (
         <UserHeader onSearch={handleSearch} />
@@ -48,9 +48,9 @@ const UserLayout = () => {
       )}
       {searchQuery && <SearchResults searchQuery={searchQuery} />}
 
-      <div className="min-h-98">
+      <main className="flex-grow">
         <Outlet />
-      </div>
+      </main>
 
       <Footer />
     </div>

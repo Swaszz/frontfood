@@ -4,19 +4,18 @@ import { loadStripe } from "@stripe/stripe-js";
 import axiosInstance from "../../config/axiosInstance";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-//const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Payment = () => {
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false); // ✅ Added for cancel button state
+  const [isCancelling, setIsCancelling] = useState(false);
   const navigate = useNavigate();
-  // ✅ Fetch Latest Pending Order
+
   const fetchLatestOrder = async () => {
     try {
-      console.log("🔵 Fetching latest order...");
+      console.log(" Fetching latest order...");
 
       const response = await axiosInstance.get("/order/latest", {
         headers: {
@@ -24,11 +23,11 @@ const Payment = () => {
         },
       });
 
-      console.log("✅ Latest Order Data:", response.data);
+      console.log("Latest Order Data:", response.data);
       setOrder(response.data?.data || response.data);
     } catch (err) {
       console.error(
-        "❌ Error fetching latest order:",
+        "Error fetching latest order:",
         err.response?.data || err.message
       );
       setError(err.response?.data || "Failed to fetch latest order.");
@@ -41,56 +40,13 @@ const Payment = () => {
     fetchLatestOrder();
   }, []);
 
-  // ✅ Handle Payment
-  /*
   const handlePayment = async () => {
     if (!order || !order._id) {
       toast.error("No pending orders available for payment.");
       return;
     }
 
-    console.log("🟡 Processing Payment for Order:", order);
-    setLoading(true);
-
-    try {
-      const stripe = await stripePromise;
-
-      const response = await axiosInstance.post(
-        "/payment/create-checkout-session", // ✅ Match backend route
-        { orderId: order._id }
-      );
-
-      console.log("✅ Stripe Session Response:", response.data);
-
-      if (response.data && response.data.sessionId) {
-        const { error } = await stripe.redirectToCheckout({
-          sessionId: response.data.sessionId,
-        });
-
-        if (error) {
-          console.error("❌ Stripe Checkout Error:", error);
-          toast.error("Failed to process payment.");
-        }
-      } else {
-        console.error("❌ No session ID received from backend:", response.data);
-        toast.error("Could not initiate payment session.");
-      }
-    } catch (error) {
-      console.error("❌ Payment Error:", error.response?.data || error.message);
-      toast.error("An error occurred while processing payment.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  */
-
-  const handlePayment = async () => {
-    if (!order || !order._id) {
-      toast.error("No pending orders available for payment.");
-      return;
-    }
-
-    console.log("🟡 Processing Payment for Order:", order);
+    console.log("Processing Payment for Order:", order);
     setLoading(true);
 
     try {
@@ -105,30 +61,30 @@ const Payment = () => {
         }
       );
 
-      console.log("✅ Stripe Session Response:", data);
+      console.log("Stripe Session Response:", data);
 
       if (data?.sessionId) {
-        await stripe.redirectToCheckout({ sessionId: data.sessionId }); // ✅ Stripe Redirection
+        await stripe.redirectToCheckout({ sessionId: data.sessionId });
       } else {
-        console.error("❌ No session ID received from backend:", data);
+        console.error("No session ID received from backend:", data);
         toast.error("Payment session could not be initiated.");
       }
     } catch (error) {
-      console.error("❌ Payment Error:", error.response?.data || error.message);
+      console.error("Payment Error:", error.response?.data || error.message);
       toast.error("An error occurred while processing payment.");
     } finally {
       setLoading(false);
     }
   };
-  // ✅ Handle Order Cancellation
+
   const handleCancelOrder = async () => {
     if (!order || !order._id) {
-      console.error("❌ No order available to cancel.");
+      console.error("No order available to cancel.");
       toast.error("No valid order to cancel.");
       return;
     }
 
-    console.log("🟡 Cancelling Order ID:", order._id);
+    console.log("Cancelling Order ID:", order._id);
     setIsCancelling(true);
 
     try {
@@ -141,23 +97,23 @@ const Payment = () => {
         }
       );
 
-      console.log("✅ Cancel Order Response:", response);
+      console.log("Cancel Order Response:", response);
 
       if (response.data.success) {
         toast.success("Order cancelled successfully!");
 
-        setOrder(null); // ✅ Clear order state
-        fetchLatestOrder(); // ✅ Refresh order details
+        setOrder(null);
+        fetchLatestOrder();
 
         setTimeout(() => {
-          navigate("/"); // ✅ Redirect to home after 1 second
+          navigate("/");
         }, 1000);
       } else {
-        console.warn("⚠️ API returned success: false", response.data);
+        console.warn("API returned success: false", response.data);
         toast.error("Failed to cancel order. Try again.");
       }
     } catch (error) {
-      console.error("❌ Error cancelling order:", error);
+      console.error("Error cancelling order:", error);
       toast.error(
         `Failed to cancel order: ${
           error.response?.data?.message || error.message
@@ -194,7 +150,6 @@ const Payment = () => {
             </p>
           </div>
 
-          {/* ✅ Payment Button */}
           <button
             className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all disabled:bg-gray-400"
             onClick={handlePayment}
@@ -203,7 +158,6 @@ const Payment = () => {
             {loading ? "Processing..." : "Pay Now"}
           </button>
 
-          {/* ✅ Cancel Order Button */}
           <button
             className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all disabled:bg-gray-400 ml-4"
             onClick={handleCancelOrder}

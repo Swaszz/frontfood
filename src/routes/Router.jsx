@@ -29,6 +29,8 @@ import Payment from "../pages/user/Payment";
 import Orderform from "../pages/restaurantowner/Orderform";
 import ProductItems from "../pages/restaurantowner/Productitems";
 import UpdateMenuform from "../pages/restaurantowner/Updatemenuform";
+import Paymentsuccess from "../pages/user/Paymentsuccess";
+import Paymentcancel from "../pages/user/Paymentcancel";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +102,14 @@ const router = createBrowserRouter([
           {
             path: "payment",
             element: <Payment />,
+          },
+          {
+            path: "success",
+            element: <Paymentsuccess />,
+          },
+          {
+            path: "cancel",
+            element: <Paymentcancel />,
           },
         ],
       },
@@ -189,23 +199,6 @@ const router = createBrowserRouter([
             <Orderform />
           </ProtectedRoute>
         ),
-      },
-    ],
-  },
-
-  {
-    path: "admin",
-
-    errorElement: <ErrorPage role="admin" />,
-    children: [
-      { path: "login", element: <Login role="admin" /> },
-      { path: "signup", element: <Signup role="admin" /> },
-      {
-        element: <ProtectedRoute role="admin" />,
-        children: [
-          { path: "dashboard", element: <h1>Admin Dashboard</h1> },
-          { path: "manage-restaurants", element: <h1>Manage Restaurants</h1> },
-        ],
       },
     ],
   },

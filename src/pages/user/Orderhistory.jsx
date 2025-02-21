@@ -7,11 +7,11 @@ const OrderHistory = () => {
   const { orderHistory, loading, error } = useSelector((state) => state.order);
 
   useEffect(() => {
-    console.log("Fetching order history..."); // ✅ Debugging
+    console.log("Fetching Order History...");
     dispatch(fetchOrderHistory());
   }, [dispatch]);
 
-  console.log("Fetched Orders:", orderHistory); // ✅ Debugging
+  console.log("Order History Fetched:", orderHistory);
 
   return (
     <div className="container mx-auto p-5">
@@ -30,7 +30,6 @@ const OrderHistory = () => {
                 <th className="border p-2">Order ID</th>
                 <th className="border p-2">Date</th>
                 <th className="border p-2">Total Price</th>
-                <th className="border p-2">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -38,12 +37,15 @@ const OrderHistory = () => {
                 <tr key={order._id} className="text-center">
                   <td className="border p-2">{order._id}</td>
                   <td className="border p-2">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleDateString()
+                      : "N/A"}
                   </td>
                   <td className="border p-2">
-                    ${order.totalPrice?.toFixed(2)}
+                    {order.totalPrice || order.totalAmount
+                      ? `$${(order.totalPrice || order.totalAmount).toFixed(2)}`
+                      : "N/A"}
                   </td>
-                  <td className="border p-2">{order.status}</td>
                 </tr>
               ))}
             </tbody>
