@@ -41,7 +41,7 @@ const OwnerLayout = () => {
   }, [location.pathname, isOwnerAuth]);
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       {isOwnerAuth ? (
         <OwnerHeader onSearch={handleSearch} />
@@ -51,7 +51,7 @@ const OwnerLayout = () => {
 
       {searchQuery && <SearchResults searchQuery={searchQuery} />}
 
-      <div className="min-h-96">
+      <div className="flex-grow">
         <Outlet />
       </div>
 
