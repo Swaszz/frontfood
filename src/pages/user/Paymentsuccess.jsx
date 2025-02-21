@@ -1,19 +1,7 @@
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 function Paymentsuccess() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-  console.log(sessionId);
-  useEffect(() => {
-    if (!sessionId) {
-      console.error("No session ID found in URL");
-      navigate("/"); // Redirect to home if session ID is missing
-    }
-  }, [sessionId, navigate]);
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-6">
       <div className="bg-white shadow-lg rounded-2xl p-8 text-center border border-gray-200">
