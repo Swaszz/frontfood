@@ -115,6 +115,7 @@ const router = createBrowserRouter([
       },
     ],
   },
+
   {
     path: "restaurantowner",
     element: <OwnerLayout />,
