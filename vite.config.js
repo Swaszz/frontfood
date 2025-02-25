@@ -11,6 +11,6 @@ server: {
   cors: true, 
   historyApiFallback: true, 
 },
-  plugins: [react(),],
+  plugins: [react()],
   
 })
