@@ -27,8 +27,10 @@ const UserLayout = () => {
       console.log(response);
       dispatch(saveUser(response.data));
       localStorage.setItem("isUserAuth", "true");
+      localStorage.setItem("userData", JSON.stringify(response.data));
     } catch (error) {
       dispatch(clearUser());
+      localStorage.removeItem("userData");
       localStorage.removeItem("isUserAuth");
       console.log(error);
     }
@@ -40,12 +42,11 @@ const UserLayout = () => {
 
   useEffect(() => {
     const storedAuth = localStorage.getItem("isUserAuth") === "true";
-
+    const storedUserData = JSON.parse(localStorage.getItem("userData"));
     // Restore auth state from localStorage
-    if (storedAuth) {
-      dispatch(saveUser({ isUserAuth: true }));
+    if (storedAuth && storedUserData) {
+      dispatch(saveUser(storedUserData)); // Restore full user data
     }
-
     // Prevent multiple API calls
     if (isFirstRender.current) {
       checkUser();
