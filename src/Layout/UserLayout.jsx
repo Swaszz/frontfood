@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Header from "../components/user/Header";
 import Footer from "../components/user/Footer";
 import { Outlet, useLocation } from "react-router-dom";
@@ -15,7 +15,6 @@ const UserLayout = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const isFirstRender = useRef(true); // Ensures useEffect runs only on mount
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
@@ -27,32 +26,17 @@ const UserLayout = () => {
       console.log(response);
       dispatch(saveUser(response.data));
       localStorage.setItem("isUserAuth", "true");
-      localStorage.setItem("userData", JSON.stringify(response.data));
     } catch (error) {
       dispatch(clearUser());
-      localStorage.removeItem("userData");
       localStorage.removeItem("isUserAuth");
       console.log(error);
     }
   };
 
-  // useEffect(() => {
-  //   checkUser();
-  // }, [location.pathname, isUserAuth]);
-
   useEffect(() => {
-    const storedAuth = localStorage.getItem("isUserAuth") === "true";
-    const storedUserData = JSON.parse(localStorage.getItem("userData"));
-    // Restore auth state from localStorage
-    if (storedAuth && storedUserData) {
-      dispatch(saveUser(storedUserData)); // Restore full user data
-    }
-    // Prevent multiple API calls
-    if (isFirstRender.current) {
-      checkUser();
-      isFirstRender.current = false;
-    }
-  }, []); // Run only once on mount
+    checkUser();
+  }, [location.pathname, isUserAuth]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
