@@ -179,6 +179,12 @@ function UserHeader() {
             </li>
             <li
               className="hover:text-blue-600 cursor-pointer"
+              onClick={() => navigate("/user/login")}
+            >
+              Login
+            </li>
+            <li
+              className="hover:text-blue-600 cursor-pointer"
               onClick={() => navigate("/user/history")}
             >
               Order
