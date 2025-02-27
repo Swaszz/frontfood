@@ -43,7 +43,9 @@ const OrderHistory = () => {
                   </td>
                   <td className="border p-2">
                     {order.totalPrice || order.totalAmount
-                      ? `$${(order.totalPrice || order.totalAmount).toFixed(2)}`
+                      ? ` ₹${(order.totalPrice || order.totalAmount).toFixed(
+                          2
+                        )}`
                       : "N/A"}
                   </td>
                 </tr>

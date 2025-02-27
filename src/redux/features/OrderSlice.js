@@ -20,12 +20,12 @@ export const fetchlatestOrder = createAsyncThunk(
       const response = await axiosInstance.get("/order/latest");
 
       if (!response.data || !response.data.cartId) {
-        console.warn("⚠️ Warning: cartId is missing in the response!");
+        console.warn(" Warning: cartId is missing in the response!");
       }
 
       return {
         ...response.data,
-        cartId: response.data.cartId || null  // ✅ Ensure `cartId` is stored
+        cartId: response.data.cartId || null  
       };
 
     } catch (error) {
@@ -85,8 +85,7 @@ const OrderSlice = createSlice({
   
       state.order = { 
           ...state.order, 
-          userId: action.payload.userId || state.order.userId || localStorage.getItem("userId"),  // ✅ Ensure userId is always present
-          cartId: action.payload.cartId || state.order.cartId || "",
+          userId: action.payload.userId || state.order.userId || localStorage.getItem("userId"),  
           orderItems: action.payload.orderItems?.length > 0 ? action.payload.orderItems : state.order.orderItems, 
           totalAmount: action.payload.totalAmount ?? state.order.totalAmount,  
           discountAmount: action.payload.discountAmount ?? state.order.discountAmount,  
@@ -94,7 +93,7 @@ const OrderSlice = createSlice({
           deliveryAddress: action.payload.deliveryAddress ?? state.order.deliveryAddress,
       };
   
-      console.log("✅ Redux Order State Updated:", state.order);
+      console.log(" Redux Order State Updated:", state.order);
   },
     applyOrderCoupon: (state, action) => {
       state.order.appliedCoupon = action.payload.coupon;
@@ -137,7 +136,7 @@ const OrderSlice = createSlice({
         state.order = { 
             ...state.order, 
             ...action.payload, 
-            userId: action.payload.userId || state.order.userId || localStorage.getItem("userId"),  // ✅ Ensure userId stays
+            userId: action.payload.userId || state.order.userId || localStorage.getItem("userId"),  
             cartId: action.payload.cartId
         }; 
     })

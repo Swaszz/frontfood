@@ -148,7 +148,7 @@ function Couponform() {
                         setCoupon(item);
                       }}
                     >
-                      ✏️ Edit
+                      Edit
                     </button>
                     <button
                       type="button"

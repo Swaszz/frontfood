@@ -1,4 +1,3 @@
-import "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "../../config/axiosInstance";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -9,17 +8,29 @@ function Signup() {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.pathname.includes("restaurantowner")
+
+  location.pathname.includes("restaurantowner") ||
+  location.pathname.includes("admin")
     ? "restaurantowner"
     : "user";
 
   const onSubmit = async (data) => {
     try {
-      const endpoint =
-        role === "restaurantowner" ? "/restaurantowner/signup" : "/user/signup";
+      let endpoint = "/user/signup";
+
+      if (role === "restaurantowner" || role === "admin") {
+        endpoint = "/restaurantowner/signup"; // Shared endpoint for restaurant owners & admins
+        data.role = data.role === "admin" ? "admin" : "restaurantOwner"; // ✅ Convert to correct format
+      }
+
+      console.log("🚀 Sending Signup Request:", { endpoint, data });
 
       const response = await axiosInstance.post(endpoint, data);
-      console.log(" Signup Response:", response);
+      console.log("✅ Signup Response:", response);
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
 
       toast.success("Signup Successful! Redirecting...", {
         position: "top-center",
@@ -28,13 +39,15 @@ function Signup() {
 
       setTimeout(() => {
         if (role === "restaurantowner") {
-          navigate("/restaurantowner/profile");
+          navigate("/restaurantowner/");
+        } else if (role === "admin") {
+          navigate("/restaurantowner/");
         } else {
-          navigate("/user/profile");
+          navigate("/");
         }
       }, 2500);
     } catch (error) {
-      console.error(" Signup Failed:", error);
+      console.error("❌ Signup Failed:", error.response?.data || error.message);
       toast.error(
         error.response?.data?.message || "Signup Failed! Please try again.",
         {
@@ -53,6 +66,7 @@ function Signup() {
         <h1 className="text-4xl font-bold text-center mb-6">Signup Now!</h1>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          {/* Name */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Name</span>
@@ -66,6 +80,7 @@ function Signup() {
             />
           </div>
 
+          {/* Address */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Address</span>
@@ -79,9 +94,10 @@ function Signup() {
             />
           </div>
 
+          {/* Phone */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Mobile</span>
+              <span className="label-text">Phone</span>
             </label>
             <input
               type="text"
@@ -92,6 +108,7 @@ function Signup() {
             />
           </div>
 
+          {/* Email */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Email</span>
@@ -105,6 +122,7 @@ function Signup() {
             />
           </div>
 
+          {/* Password */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Password</span>
@@ -118,6 +136,7 @@ function Signup() {
             />
           </div>
 
+          {/* ✅ Role Field for Restaurant Owners & Admins */}
           {role === "restaurantowner" && (
             <div className="form-control">
               <label className="label">
@@ -125,28 +144,15 @@ function Signup() {
               </label>
               <input
                 type="text"
-                placeholder="Enter your role (e.g. restaurantOwner,admin)"
+                placeholder="Enter your role (e.g., restaurantOwner, admin)"
                 {...register("role")}
                 className="input input-bordered w-full"
+                required
               />
             </div>
           )}
 
-          <div className="form-control">
-            <label className="label">
-              <Link
-                to={
-                  role === "restaurantowner"
-                    ? "/restaurantowner/login"
-                    : "/login"
-                }
-                className="label-text-alt link link-hover"
-              >
-                Existing User? Login Here
-              </Link>
-            </label>
-          </div>
-
+          {/* Submit Button */}
           <div className="form-control mt-4">
             <button className="btn btn-primary w-full">Signup</button>
           </div>

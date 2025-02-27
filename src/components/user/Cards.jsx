@@ -16,9 +16,7 @@ function MenuCards({ menuItem }) {
 
       <div className="p-5 space-y-3">
         <h2 className="text-2xl font-bold text-black-800">{menuItem?.name}</h2>
-        <p className="text-lg text-primary font-semibold">
-          Rs:{menuItem?.price}
-        </p>
+        <p className="text-lg text-primary font-semibold">₹{menuItem?.price}</p>
 
         <div className="flex justify-end">
           <button

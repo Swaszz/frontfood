@@ -47,14 +47,14 @@ const Cart = () => {
         console.log("🛠 Raw Cart API Response:", response.data);
 
         if (!response.data || !response.data.data) {
-          console.warn("⚠️ No cart data received. Not updating Redux.");
+          console.warn(" No cart data received. Not updating Redux.");
           return;
         }
 
         console.log("🔹 Dispatching Redux Cart Update:", response.data.data);
         dispatch(setCart(response.data.data));
       } catch (error) {
-        console.error("❌ Error fetching cart:", error);
+        console.error(" Error fetching cart:", error);
       }
     };
 
@@ -131,10 +131,9 @@ const Cart = () => {
         couponCode: selectedCoupon,
       });
 
-      console.log("Full Coupon API Response:", response); // ✅ Debugging line
-      console.log("Response Data:", response.data); // ✅ Debugging line
+      console.log("Full Coupon API Response:", response);
+      console.log("Response Data:", response.data);
 
-      // ✅ Extract discountAmount and discountType correctly from `cart` object
       const updatedCart = response.data.cart;
 
       if (!updatedCart || updatedCart.discountAmount === undefined) {
@@ -146,18 +145,22 @@ const Cart = () => {
         return;
       }
 
-      // ✅ Dispatch applyCoupon with correct values
       dispatch(
         applyCoupon({
           coupon: selectedCoupon,
           discountAmount: updatedCart.discountAmount,
-          discountType: updatedCart.discountType || "percentage", // Default to percentage if not provided
+          discountType: updatedCart.discountType || "percentage",
         })
       );
 
-      // ✅ Force refresh cart after applying coupon
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      dispatch(fetchCart());
+      dispatch(
+        setCart({
+          ...cart,
+          totalAmount: updatedCart.totalAmount,
+          discountAmount: updatedCart.discountAmount,
+          appliedCoupon: selectedCoupon,
+        })
+      );
 
       toast.success("Coupon applied successfully!");
     } catch (error) {
@@ -169,7 +172,7 @@ const Cart = () => {
     }
   };
   useEffect(() => {
-    console.log("Cart Updated:", cart); // ✅ Debugging line
+    console.log("Cart Updated:", cart);
   }, [cart]);
   const handleProceedToCheckout = async () => {
     try {
@@ -182,12 +185,12 @@ const Cart = () => {
   };
 
   if (!cart || !Array.isArray(cart.cartItems)) {
-    console.warn("🚨 Invalid cart state. Not rendering UI.", cart);
+    console.warn(" Invalid cart state. Not rendering UI.", cart);
     return <p className="text-center text-gray-600">Loading cart...</p>;
   }
 
   if (cart.cartItems.length === 0) {
-    console.warn("🛒 Cart is empty in state but should contain items!", cart);
+    console.warn(" Cart is empty in state but should contain items!", cart);
     return <p className="text-center text-gray-600">Your cart is empty. 🛒</p>;
   }
   return (
@@ -206,7 +209,7 @@ const Cart = () => {
               />
               <div className="ml-4 flex-1">
                 <h3 className="text-lg">{item.name}</h3>
-                <p className="text-gray-500">Rs:{item.price?.toFixed(2)}</p>
+                <p className="text-gray-500"> ₹{item.price?.toFixed(2)}</p>
 
                 <div className="flex mt-2">
                   <button
@@ -239,7 +242,7 @@ const Cart = () => {
           ))}
 
           <h3 className="text-xl font-bold mt-4">
-            Total: Rs:{cart.totalAmount?.toFixed(2)}
+            Total: ₹{cart.totalAmount?.toFixed(2)}
           </h3>
 
           <div className="mt-4 flex">

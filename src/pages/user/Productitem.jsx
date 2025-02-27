@@ -65,7 +65,7 @@ function ProductItem() {
               <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
                 {item.description.slice(0, 60)}...
               </p>
-              <p className="text-lg font-bold text-primary">${item.price}</p>
+              <p className="text-lg font-bold text-primary"> ₹{item.price}</p>
 
               <button
                 className="mt-3 w-full flex items-center justify-center gap-2 bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition duration-200"

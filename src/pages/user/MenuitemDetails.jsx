@@ -95,16 +95,13 @@ function MenuitemDetails() {
               </h2>
               <p className="text-black-600">{MenuItemDetails?.description}</p>
               <p className="text-lg font-semibold text-primary">
-                Rs:{MenuItemDetails?.price}
+                ₹{MenuItemDetails?.price}
               </p>
               <p className="text-black-700">
                 Category: {MenuItemDetails?.category}
               </p>
               <p className="text-black-700">
                 Restaurant: {MenuItemDetails?.restaurantId?.name || "Unknown"}
-              </p>
-              <p className="text-black-700">
-                Rating: {MenuItemDetails?.restaurantRating || "N/A"}
               </p>
 
               <button

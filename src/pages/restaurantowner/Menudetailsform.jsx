@@ -57,7 +57,7 @@ function Menudetailsform() {
 
   return (
     <div className="flex flex-col md:flex-row h-screen transition-all duration-300">
-      {/* Sidebar */}
+      <ToastContainer />
       <aside className="w-full md:w-1/4 p-6 bg-gray-900 text-white dark:bg-gray-800 shadow-lg">
         <h2 className="text-xl font-semibold mb-4">Manage</h2>
         <ul className="space-y-3">
@@ -88,14 +88,12 @@ function Menudetailsform() {
         </ul>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 p-6 bg-gray-100 dark:bg-black transition-colors duration-300">
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
           <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-white">
             Manage Menu Items
           </h2>
 
-          {/* Select Restaurant */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Select Restaurant
@@ -113,7 +111,6 @@ function Menudetailsform() {
             </select>
           </div>
 
-          {/* Menu Items */}
           {selectedRestaurant && (
             <div className="mt-6">
               <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-white">

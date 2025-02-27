@@ -35,9 +35,9 @@ export const CartSlice = createSlice({
                 (acc, item) => acc + (item.price * item.quantity || 0), 0
             );
         
-            console.log("New Subtotal Before Discount:", newSubtotal); // ✅ Debugging line
+            console.log("New Subtotal Before Discount:", newSubtotal); 
         
-            // ✅ Step 2: Ensure appliedCoupon, discountAmount, and discountType persist
+          
             if (state.cart.appliedCoupon && state.cart.discountAmount !== undefined) {
                 if (state.cart.discountType === "percentage") {
                     state.cart.totalAmount = parseFloat((newSubtotal * (1 - state.cart.discountAmount / 100)).toFixed(2));
@@ -48,11 +48,11 @@ export const CartSlice = createSlice({
                 state.cart.totalAmount = newSubtotal;
             }
         
-            console.log("Total Amount After Adding Item:", state.cart.totalAmount); // ✅ Debugging line
+            console.log("Total Amount After Adding Item:", state.cart.totalAmount); 
         
-            // ✅ Ensure appliedCoupon persists
+            
             state.cart.appliedCoupon = state.cart.appliedCoupon || null;
-            state.cart.discountType = state.cart.discountType || "percentage"; // Default to percentage if missing
+            state.cart.discountType = state.cart.discountType || "percentage"; 
         },
         updateItemQuantity: (state, action) => {
             if (!state.cart.cartItems) state.cart.cartItems = []; 
@@ -78,9 +78,9 @@ export const CartSlice = createSlice({
             state.cart = { ...state.cart, ...action.payload };
         },
         applyCoupon: (state, action) => {
-            console.log("✅ Backend Coupon Applied:", action.payload);
+            console.log(" Backend Coupon Applied:", action.payload);
 
-            state.cart.totalAmount = action.payload.totalAmount; // ✅ Trust the backend
+            state.cart.totalAmount = action.payload.totalAmount; 
             state.cart.appliedCoupon = action.payload.coupon;
             state.cart.discountAmount = action.payload.discountAmount;
             state.cart.discountType = action.payload.discountType;
@@ -97,15 +97,15 @@ export const CartSlice = createSlice({
             console.log("🔹 FetchCart API Response:", action.payload);
         
             if (action.payload) {
-                state.cartId = action.payload.cartId ?? null;  // ✅ Use ?? instead of ||
+                state.cartId = action.payload.cartId ?? null;  
                 state.userId = action.payload.userId ?? null;
-                state.cartItems = action.payload.cartItems ? [...action.payload.cartItems] : []; // ✅ Check before spreading
+                state.cartItems = action.payload.cartItems ? [...action.payload.cartItems] : []; 
                 state.totalAmount = action.payload.totalAmount ?? 0;
                 state.appliedCoupon = action.payload.appliedCoupon ?? null;
         
-                console.log("✅ Redux Cart Updated in Slice:", { ...state }); // Log updated Redux state
+                console.log(" Redux Cart Updated in Slice:", { ...state }); 
             } else {
-                console.warn("⚠️ Received invalid cart response, resetting state");
+                console.warn("Received invalid cart response, resetting state");
                 state.cartItems = [];
                 state.totalAmount = 0;
                 state.appliedCoupon = null;

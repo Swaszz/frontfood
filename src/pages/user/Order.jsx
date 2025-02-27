@@ -29,25 +29,25 @@ function Order() {
   }, [dispatch]);
   const fetchCartBeforeOrder = async () => {
     const response = await axiosInstance.get("/cart/getcart");
-    dispatch(setCart(response.data.data)); // ✅ Ensure Redux updates before checkout
+    dispatch(setCart(response.data.data));
   };
   useEffect(() => {
     fetchCartBeforeOrder();
   }, []);
   useEffect(() => {
     console.log(
-      "🔥 Current Redux Order State Before Placing Order:",
+      " Current Redux Order State Before Placing Order:",
       orderState.order
     );
   }, [orderState.order]);
   const handlePlaceOrder = async () => {
     if (!cart?.cartId) {
-      console.error("❌ Error: `cartId` is missing before placing the order!");
+      console.error(" Error: `cartId` is missing before placing the order!");
       toast.error("Cart ID is missing! Please refresh and try again.");
       return;
     }
 
-    console.log("🛒 Cart Items Before Order:", cart.cartItems); // Debugging log
+    console.log(" Cart Items Before Order:", cart.cartItems);
 
     try {
       const orderData = {
@@ -63,28 +63,26 @@ function Order() {
         })),
       };
 
-      console.log("🚀 Placing Order with Data:", orderData);
+      console.log(" Placing Order with Data:", orderData);
 
       const response = await axiosInstance.post("/order/placeorder", orderData);
-      console.log("✅ Order API Response:", response.data);
+      console.log(" Order API Response:", response.data);
 
-      // 🔥 Debugging: Check backend response structure
       if (!response.data || !response.data.orderId) {
         console.error(
-          "❌ Error: No `orderId` received from backend!",
+          " Error: No `orderId` received from backend!",
           response.data
         );
         toast.error("Order ID is missing. Cannot proceed to payment.");
         return;
       }
 
-      const orderId = response.data.orderId; // ✅ Extract correct `orderId`
+      const orderId = response.data.orderId;
       toast.success("Order placed successfully!");
 
-      // ✅ Navigate to Payment Page with order details
       navigate("/user/payment", {
         state: {
-          orderId: orderId, // ✅ Pass correct `orderId`
+          orderId: orderId,
           cartId: cart.cartId,
           totalAmount: cart.totalAmount,
           discountAmount: cart.discountAmount,
@@ -92,7 +90,7 @@ function Order() {
         },
       });
     } catch (error) {
-      console.error("❌ Order Placement Failed:", error);
+      console.error(" Order Placement Failed:", error);
       toast.error("Failed to place order. Please try again.");
     }
   };
@@ -125,11 +123,11 @@ function Order() {
                 {item.name}
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
-                Rs: {item.price.toFixed(2)} x {item.quantity}
+                ₹ {item.price.toFixed(2)} x {item.quantity}
               </p>
             </div>
             <p className="font-bold text-gray-900 dark:text-gray-100">
-              Rs: {(item.price * item.quantity).toFixed(2)}
+              ₹ {(item.price * item.quantity).toFixed(2)}
             </p>
           </div>
         ))}
@@ -153,13 +151,11 @@ function Order() {
         <div className="text-gray-900 dark:text-gray-100 text-lg font-semibold">
           <p>
             Total Price:{" "}
-            <span className="font-bold">
-              Rs: {order.totalAmount.toFixed(2)}
-            </span>
+            <span className="font-bold">₹ {order.totalAmount.toFixed(2)}</span>
           </p>
           {order.discountAmount > 0 && (
             <p className="text-green-600 dark:text-green-400">
-              Discount: -Rs {order.discountAmount.toFixed(2)}
+              Discount: ₹ {order.discountAmount.toFixed(2)}
             </p>
           )}
         </div>

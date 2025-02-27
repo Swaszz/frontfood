@@ -13,7 +13,7 @@ const Payment = () => {
   const [isCancelling, setIsCancelling] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const locationOrder = location.state || null; // ✅ Store location order separately
+  const locationOrder = location.state || null;
 
   useEffect(() => {
     console.log("🔹 Order from Navigation:", locationOrder);
@@ -33,17 +33,16 @@ const Payment = () => {
         },
       });
 
-      console.log("✅ Latest Order Data:", response.data);
+      console.log(" Latest Order Data:", response.data);
 
-      // ✅ Merge latest order data while keeping `orderId`
       setOrder((prevOrder) => ({
         ...response.data,
         orderId:
-          prevOrder?.orderId ?? response.data.orderId ?? response.data._id, // ✅ Preserve `orderId`
+          prevOrder?.orderId ?? response.data.orderId ?? response.data._id,
       }));
     } catch (error) {
       console.error(
-        "❌ Error fetching latest order:",
+        " Error fetching latest order:",
         error.response?.data || error.message
       );
       setError(error.response?.data || "Failed to fetch latest order.");
@@ -56,16 +55,15 @@ const Payment = () => {
   }, []);
 
   const handlePayment = async () => {
-    console.log("🔹 Checking Order Data Before Payment:", order);
+    console.log(" Checking Order Data Before Payment:", order);
 
     if (!order.orderId) {
-      // ✅ Ensure `orderId` is used
-      console.error("❌ Error: `orderId` is missing!", order);
+      console.error(" Error: `orderId` is missing!", order);
       toast.error("Order ID is missing. Cannot proceed with payment.");
       return;
     }
 
-    console.log("✅ Order Ready for Payment:", order);
+    console.log(" Order Ready for Payment:", order);
 
     setLoading(true);
 
@@ -77,9 +75,9 @@ const Payment = () => {
       const { data } = await axiosInstance.post(
         "/payment/create-checkout-session",
         {
-          orderId: order.orderId, // ✅ Ensure correct `orderId`
+          orderId: order.orderId,
           cartId: order.cartId,
-          amount: order.totalAmount - (order.discountAmount ?? 0), // ✅ Ensure `discountAmount` is not `undefined`
+          amount: order.totalAmount - (order.discountAmount ?? 0),
           menuItem: order.orderItems.map((item) => ({
             menuItemId: item._id,
             name: item.name,
@@ -89,16 +87,16 @@ const Payment = () => {
         }
       );
 
-      console.log("✅ Stripe Session Response:", data);
+      console.log(" Stripe Session Response:", data);
 
       if (data?.sessionId) {
         await stripe.redirectToCheckout({ sessionId: data.sessionId });
       } else {
-        console.error("❌ No session ID received from backend:", data);
+        console.error(" No session ID received from backend:", data);
         toast.error("Payment session could not be initiated.");
       }
     } catch (error) {
-      console.error("❌ Payment Error:", error.response?.data || error.message);
+      console.error(" Payment Error:", error.response?.data || error.message);
       toast.error("An error occurred while processing payment.");
     } finally {
       setLoading(false);

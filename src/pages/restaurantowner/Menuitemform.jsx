@@ -226,7 +226,7 @@ function Menuitemform() {
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg shadow-md transition-all"
                 onClick={() => navigate("/restaurantowner/selectmenu")}
               >
-                ✏️ Edit
+                Edit
               </button>
             </div>
           </form>

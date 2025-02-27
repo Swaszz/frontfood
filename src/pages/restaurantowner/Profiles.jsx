@@ -100,106 +100,122 @@ function Profiles() {
       console.error(" Logout failed:", error.response?.data || error.message);
     }
   };
+
   return (
-    <div>
-      <div>
-        <section>
-          <div className="flex">
-            {!editMode ? (
-              <button
-                className="btn btn-secondary mr-auto"
-                onClick={() => setEditMode(true)}
-              >
-                EDIT
-              </button>
-            ) : (
-              <button
-                className="btn btn-secondary ml-auto"
-                onClick={() => setEditMode(false)}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-          <div className="flex flex-col items-center text-center mt-6">
-            <img
-              src={formData.profilePic}
-              className="w-40 h-40 rounded-full"
-              alt="profileImage"
-            />
-            <div className="mt-4 text-left">
-              <p className="mt-4 text-xl font-semibold">
-                <span className="font-semibold">Name:</span>
-                {editMode ? (
-                  <input
-                    type="text"
-                    name="name"
-                    className="input input-bordered w-full"
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  formData.name
-                )}
-              </p>
-              <p className="mt-4 text-xl font-semibold">
-                <span className="font-semibold">Email:</span>
-                {editMode ? (
-                  <input
-                    type="text"
-                    name="email"
-                    className="input input-bordered w-full"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  formData.email
-                )}
-              </p>
-              <p className="mt-4 text-xl font-semibold">
-                <span className="font-semibold">Address:</span>
-                {editMode ? (
-                  <input
-                    type="text"
-                    name="address"
-                    className="input input-bordered w-full"
-                    value={formData.address}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  formData.address
-                )}
-              </p>
-              <p className="mt-4 text-xl font-semibold">
-                <span className="font-semibold">Phone:</span>
-                {editMode ? (
-                  <input
-                    type="text"
-                    name="phone"
-                    className="input input-bordered w-full"
-                    value={formData.phone}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  formData.phone
-                )}
-              </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 transition-all">
+        <div className="flex justify-between mb-6">
+          {!editMode ? (
+            <button
+              className="btn btn-secondary"
+              onClick={() => setEditMode(true)}
+            >
+              Edit Profile
+            </button>
+          ) : (
+            <button
+              className="btn btn-outline btn-error"
+              onClick={() => setEditMode(false)}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center text-center">
+          <img
+            src={formData.profilePic}
+            className="w-32 h-32 rounded-full shadow-md"
+            alt="profile"
+          />
+          <div className="mt-6 w-full text-left">
+            <div className="mb-4">
+              <label className="text-gray-700 dark:text-gray-300 font-semibold">
+                Name:
+              </label>
+              {editMode ? (
+                <input
+                  type="text"
+                  name="name"
+                  className="input input-bordered w-full dark:bg-gray-700"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p className="text-lg font-medium">{formData.name}</p>
+              )}
             </div>
+
+            <div className="mb-4">
+              <label className="text-gray-700 dark:text-gray-300 font-semibold">
+                Email:
+              </label>
+              {editMode ? (
+                <input
+                  type="text"
+                  name="email"
+                  className="input input-bordered w-full dark:bg-gray-700"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p className="text-lg font-medium">{formData.email}</p>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="text-gray-700 dark:text-gray-300 font-semibold">
+                Address:
+              </label>
+              {editMode ? (
+                <input
+                  type="text"
+                  name="address"
+                  className="input input-bordered w-full dark:bg-gray-700"
+                  value={formData.address}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p className="text-lg font-medium">{formData.address}</p>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="text-gray-700 dark:text-gray-300 font-semibold">
+                Phone:
+              </label>
+              {editMode ? (
+                <input
+                  type="text"
+                  name="phone"
+                  className="input input-bordered w-full dark:bg-gray-700"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p className="text-lg font-medium">{formData.phone}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full flex flex-col sm:flex-row justify-center gap-4 mt-6">
             {editMode && (
               <button
-                className="btn btn-primary mt-4 w-40"
+                className="btn btn-primary w-full sm:w-auto"
                 onClick={handleUpdateProfile}
                 disabled={loading}
               >
                 {loading ? "Saving..." : "Save Changes"}
               </button>
             )}
-            <button className="btn btn-accent mt-4 w-40" onClick={handleLogOut}>
-              {" "}
-              Logout{" "}
+            <button
+              className="btn btn-accent w-full sm:w-auto"
+              onClick={handleLogOut}
+            >
+              Logout
             </button>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   );
