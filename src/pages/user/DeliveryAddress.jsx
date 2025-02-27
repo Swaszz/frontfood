@@ -18,6 +18,7 @@ function DeliveryAddress() {
   const navigate = useNavigate();
 
   const orderState = useSelector((state) => state.order);
+  const [orderReady, setOrderReady] = useState(false);
   const { addresses, isLoading, error } = useSelector(
     (state) => state.delivery
   );
@@ -101,7 +102,7 @@ function DeliveryAddress() {
   const handleSelectAddress = (address) => {
     setSelectedAddress(address);
   };
-
+  /*
   useEffect(() => {
     console.log(" Watching Redux order state updates...", orderState.order);
 
@@ -115,8 +116,11 @@ function DeliveryAddress() {
       console.warn("Order items are still empty, waiting for update...");
     }
   }, [orderState?.order?.orderItems?.length, navigate]);
+*/
+  //const latestCart = useSelector((state) => state.cart);
+  const updatedCart = useSelector((state) => state.cart);
   const handleDeliverToThisAddress = async () => {
-    console.log(" Checking Cart Data Before Navigation:", cart);
+    console.log("🔹 Checking Cart Data Before Navigation:", cart);
 
     if (!selectedAddress) {
       toast.error("Please select a delivery address.");
@@ -124,24 +128,63 @@ function DeliveryAddress() {
     }
 
     if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
-      console.error("No items found in cart:", cart);
-      toast.error("No items in the cart to proceed.");
+      console.warn("⚠️ Cart is empty, refetching...");
+
+      try {
+        await dispatch(fetchCart()).unwrap(); // ✅ Ensure Redux updates before proceeding
+        console.log("✅ FetchCart complete. Waiting for Redux update...");
+      } catch (error) {
+        console.error("❌ Error fetching cart:", error);
+        toast.error("Failed to fetch cart data.");
+        return;
+      }
+    }
+
+    // ✅ Get the latest Redux cart data AFTER fetchCart() completes
+
+    // ✅ Ensure `userId` is fetched from Redux or `localStorage`
+    const userIdFromRedux = updatedCart?.userId; // ✅ Use the latest Redux cart state
+    const userIdFromLocalStorage = localStorage.getItem("userId");
+    const finalUserId = userIdFromRedux || userIdFromLocalStorage;
+
+    if (!finalUserId) {
+      console.error("❌ Error: User ID is missing before dispatching order!");
+      toast.error("Authentication error. Please log in again.");
       return;
     }
 
-    await dispatch(
+    console.log("🔹 Final User ID Before Dispatching Order:", finalUserId);
+
+    dispatch(
       setOrder({
-        orderItems: cart.cartItems,
-        totalAmount: cart.totalAmount,
-        discountAmount: cart.discountAmount || 0,
-        appliedCoupon: cart.appliedCoupon,
+        userId: finalUserId, // ✅ Ensures userId is always set
+        cartId: updatedCart.cartId, // ✅ Use latest cartId
+        orderItems: [...updatedCart.cartItems], // ✅ Get latest cart items
+        totalAmount: updatedCart.totalAmount,
+        discountAmount: updatedCart.discountAmount || 0,
+        appliedCoupon: updatedCart.appliedCoupon,
         deliveryAddress: selectedAddress,
       })
     );
 
-    console.log(" Waiting for Redux to update...");
+    console.log("✅ Redux Order State Dispatched:", finalUserId);
+    setOrderReady(true);
   };
+  useEffect(() => {
+    console.log(" Watching Redux order state updates...", orderState.order);
 
+    if (orderReady && orderState.order.orderItems.length > 0) {
+      console.log("✅ Order is set in Redux. Navigating to Order Page...");
+      navigate("/user/order");
+    } else if (orderReady) {
+      console.warn("⚠️ Order items are still empty, waiting for update...");
+    }
+  }, [
+    orderReady,
+    orderState.order, // ✅ Watches Redux order state
+    dispatch,
+    navigate,
+  ]);
   return (
     <div className="container mx-auto max-w-4xl p-6">
       <ToastContainer />

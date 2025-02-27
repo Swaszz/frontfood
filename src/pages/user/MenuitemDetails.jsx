@@ -95,7 +95,7 @@ function MenuitemDetails() {
               </h2>
               <p className="text-black-600">{MenuItemDetails?.description}</p>
               <p className="text-lg font-semibold text-primary">
-                ${MenuItemDetails?.price}
+                Rs:{MenuItemDetails?.price}
               </p>
               <p className="text-black-700">
                 Category: {MenuItemDetails?.category}

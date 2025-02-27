@@ -1,7 +1,14 @@
-import { CheckCircle } from "lucide-react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { CheckCircle } from "lucide-react";
+
 function Paymentsuccess() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("✅ Payment Success Page Loaded");
+  }, []); // ✅ Corrected useEffect syntax
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-6">
       <div className="bg-white shadow-lg rounded-2xl p-8 text-center border border-gray-200">

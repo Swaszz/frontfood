@@ -35,7 +35,7 @@ const Categorypage = () => {
                 {item.name}
               </h2>
               <p className="text-gray-700 dark:text-gray-300">
-                ${item.price.toFixed(2)}
+                Rs:{item.price.toFixed(2)}
               </p>
 
               <Link

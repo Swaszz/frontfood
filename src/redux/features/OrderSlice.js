@@ -13,7 +13,26 @@ export const fetchOrderSummary = createAsyncThunk(
     }
   }
 );
+export const fetchlatestOrder = createAsyncThunk(
+  "order/fetchlatestOrder",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/order/latest");
 
+      if (!response.data || !response.data.cartId) {
+        console.warn("⚠️ Warning: cartId is missing in the response!");
+      }
+
+      return {
+        ...response.data,
+        cartId: response.data.cartId || null  // ✅ Ensure `cartId` is stored
+      };
+
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error fetching latest order");
+    }
+  }
+);
 export const fetchOrderHistory = createAsyncThunk(
   "order/fetchOrderHistory",
   async (_, { rejectWithValue }) => {
@@ -41,8 +60,10 @@ export const fetchOrderHistory = createAsyncThunk(
 
 const initialState = {
   order: {
+    cartId: "", 
+    userId: "", 
     orderItems: [],
-    deliveryAddress: null,
+    deliveryAddress: null, 
     restaurant: null,
     totalAmount: 0,
     discountAmount: 0,
@@ -59,21 +80,22 @@ const OrderSlice = createSlice({
   name: "order",
   initialState,
   reducers: {
-   
     setOrder: (state, action) => {
-      console.log("🔹 Updating Order State in Redux:", action.payload);
-      
+      console.log("🔹 Updating Redux Order State:", action.payload);
+  
       state.order = { 
-        ...state.order, 
-        orderItems: action.payload.orderItems ?? state.order.orderItems, 
-        totalAmount: action.payload.totalAmount ?? state.order.totalAmount,
-        discountAmount: action.payload.discountAmount ?? state.order.discountAmount,
-        appliedCoupon: action.payload.appliedCoupon ?? state.order.appliedCoupon,
-        deliveryAddress: action.payload.deliveryAddress ?? state.order.deliveryAddress,
+          ...state.order, 
+          userId: action.payload.userId || state.order.userId || localStorage.getItem("userId"),  // ✅ Ensure userId is always present
+          cartId: action.payload.cartId || state.order.cartId || "",
+          orderItems: action.payload.orderItems?.length > 0 ? action.payload.orderItems : state.order.orderItems, 
+          totalAmount: action.payload.totalAmount ?? state.order.totalAmount,  
+          discountAmount: action.payload.discountAmount ?? state.order.discountAmount,  
+          appliedCoupon: action.payload.appliedCoupon ?? state.order.appliedCoupon,
+          deliveryAddress: action.payload.deliveryAddress ?? state.order.deliveryAddress,
       };
-    },
-
-    
+  
+      console.log("✅ Redux Order State Updated:", state.order);
+  },
     applyOrderCoupon: (state, action) => {
       state.order.appliedCoupon = action.payload.coupon;
       state.order.discountAmount = action.payload.discountAmount;
@@ -111,12 +133,19 @@ const OrderSlice = createSlice({
       })
       .addCase(fetchOrderSummary.fulfilled, (state, action) => {
         state.loading = false;
-        state.order = { ...state.order, ...action.payload }; 
-      })
+    
+        state.order = { 
+            ...state.order, 
+            ...action.payload, 
+            userId: action.payload.userId || state.order.userId || localStorage.getItem("userId"),  // ✅ Ensure userId stays
+            cartId: action.payload.cartId
+        }; 
+    })
       .addCase(fetchOrderSummary.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+     
       .addCase(fetchOrderHistory.fulfilled, (state, action) => {
         state.orderHistory = action.payload;
       });

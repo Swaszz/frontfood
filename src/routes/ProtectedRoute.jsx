@@ -32,7 +32,7 @@ function ProtectedRoute({ role, children }) {
     } else {
       setIsChecked(true);
     }
-  }, [role, isUserAuth, isOwnerAuth, isAdminAuth, navigate]);
+  }, [isUserAuth, isOwnerAuth, isAdminAuth, navigate]);
 
   if (!isChecked) {
     return <div>Loading...</div>;

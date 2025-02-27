@@ -9,7 +9,6 @@ export const fetchCart = createAsyncThunk("cart/fetchCart", async (_, { rejectWi
         return rejectWithValue(error.response?.data || "Error fetching cart");
     }
 });
-
 const initialState = {
     cart: { cartItems: [], totalAmount: 0, discountAmount:0,appliedCoupon: null },
     loading: false,
@@ -32,6 +31,28 @@ export const CartSlice = createSlice({
             } else {
                 state.cart.cartItems.push(newItem);
             }
+            const newSubtotal = state.cart.cartItems.reduce(
+                (acc, item) => acc + (item.price * item.quantity || 0), 0
+            );
+        
+            console.log("New Subtotal Before Discount:", newSubtotal); // ✅ Debugging line
+        
+            // ✅ Step 2: Ensure appliedCoupon, discountAmount, and discountType persist
+            if (state.cart.appliedCoupon && state.cart.discountAmount !== undefined) {
+                if (state.cart.discountType === "percentage") {
+                    state.cart.totalAmount = parseFloat((newSubtotal * (1 - state.cart.discountAmount / 100)).toFixed(2));
+                } else {
+                    state.cart.totalAmount = Math.max(0, newSubtotal - state.cart.discountAmount);
+                }
+            } else {
+                state.cart.totalAmount = newSubtotal;
+            }
+        
+            console.log("Total Amount After Adding Item:", state.cart.totalAmount); // ✅ Debugging line
+        
+            // ✅ Ensure appliedCoupon persists
+            state.cart.appliedCoupon = state.cart.appliedCoupon || null;
+            state.cart.discountType = state.cart.discountType || "percentage"; // Default to percentage if missing
         },
         updateItemQuantity: (state, action) => {
             if (!state.cart.cartItems) state.cart.cartItems = []; 
@@ -44,6 +65,11 @@ export const CartSlice = createSlice({
         removeItemFromCart: (state, action) => {
             if (!state.cart.cartItems) state.cart.cartItems = []; 
             state.cart.cartItems = state.cart.cartItems.filter(item => item._id !== action.payload);
+        
+            state.cart.totalAmount = state.cart.cartItems.reduce(
+                (acc, item) => acc + item.price * item.quantity,
+                0
+            );
         },
         clearCart: (state) => {
             state.cart = { cartItems: [], totalAmount: 0, discountAmount: 0, appliedCoupon: null }; 
@@ -52,21 +78,14 @@ export const CartSlice = createSlice({
             state.cart = { ...state.cart, ...action.payload };
         },
         applyCoupon: (state, action) => {
-            if (!state.cart) state.cart = { cartItems: [], totalAmount: 0 };
-        
-         
-            state.cart.coupon = action.payload.coupon;
+            console.log("✅ Backend Coupon Applied:", action.payload);
+
+            state.cart.totalAmount = action.payload.totalAmount; // ✅ Trust the backend
+            state.cart.appliedCoupon = action.payload.coupon;
             state.cart.discountAmount = action.payload.discountAmount;
-            state.cart.totalAmount = action.payload.totalAmount;
-        
-           
-            if (action.payload.cartItems && action.payload.cartItems.length > 0) {
-                state.cart.cartItems = action.payload.cartItems;
-            } else {
-                console.warn("Warning: API response did not include cartItems. Keeping existing cart items.");
-            }
+            state.cart.discountType = action.payload.discountType;
         },
-        
+      
         proceedToCheckout: (state) => {
             state.cart = { cartItems: [], totalAmount: 0, appliedCoupon: null };
         },
@@ -74,10 +93,25 @@ export const CartSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-            .addCase(fetchCart.fulfilled, (state, action) => {
-                console.log("Cart Fetched in Redux:", action.payload);
-                state.cart = action.payload; 
-            })
+        .addCase(fetchCart.fulfilled, (state, action) => {
+            console.log("🔹 FetchCart API Response:", action.payload);
+        
+            if (action.payload) {
+                state.cartId = action.payload.cartId ?? null;  // ✅ Use ?? instead of ||
+                state.userId = action.payload.userId ?? null;
+                state.cartItems = action.payload.cartItems ? [...action.payload.cartItems] : []; // ✅ Check before spreading
+                state.totalAmount = action.payload.totalAmount ?? 0;
+                state.appliedCoupon = action.payload.appliedCoupon ?? null;
+        
+                console.log("✅ Redux Cart Updated in Slice:", { ...state }); // Log updated Redux state
+            } else {
+                console.warn("⚠️ Received invalid cart response, resetting state");
+                state.cartItems = [];
+                state.totalAmount = 0;
+                state.appliedCoupon = null;
+            }
+        })
+        
             .addCase(fetchCart.rejected, (state, action) => {
                 console.error("Error fetching cart:", action.payload);
                 state.error = action.payload;

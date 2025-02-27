@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axiosInstance";
 import {
   setCart,
+  fetchCart,
   updateItemQuantity,
   removeItemFromCart,
   clearCart,
+  applyCoupon,
   proceedToCheckout,
 } from "../../redux/features/CartSlice";
 import { toast, ToastContainer } from "react-toastify";
@@ -38,29 +40,35 @@ const Cart = () => {
 
     fetchCoupons();
   }, []);
-
   useEffect(() => {
     const fetchCartData = async () => {
       try {
         const response = await axiosInstance.get("/cart/getcart");
-        dispatch(
-          setCart(
-            response.data?.data || {
-              cartItems: [],
-              totalAmount: 0,
-              cartId: null,
-            }
-          )
-        );
+        console.log("🛠 Raw Cart API Response:", response.data);
+
+        if (!response.data || !response.data.data) {
+          console.warn("⚠️ No cart data received. Not updating Redux.");
+          return;
+        }
+
+        console.log("🔹 Dispatching Redux Cart Update:", response.data.data);
+        dispatch(setCart(response.data.data));
       } catch (error) {
-        console.error("Error fetching cart:", error);
-        dispatch(setCart({ cartItems: [], totalAmount: 0, cartId: null }));
+        console.error("❌ Error fetching cart:", error);
       }
     };
 
     fetchCartData();
   }, [dispatch]);
-
+  useEffect(() => {
+    setCart((prevCart) => ({
+      ...prevCart,
+      totalAmount: prevCart.items.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      ),
+    }));
+  }, [cart.items]);
   const handleUpdateQuantity = async (menuItemId, newQuantity) => {
     if (newQuantity < 1) return;
     try {
@@ -123,15 +131,46 @@ const Cart = () => {
         couponCode: selectedCoupon,
       });
 
-      dispatch(setCart(response.data?.cart));
+      console.log("Full Coupon API Response:", response); // ✅ Debugging line
+      console.log("Response Data:", response.data); // ✅ Debugging line
+
+      // ✅ Extract discountAmount and discountType correctly from `cart` object
+      const updatedCart = response.data.cart;
+
+      if (!updatedCart || updatedCart.discountAmount === undefined) {
+        console.error(
+          "Invalid API Response - Missing Discount Info:",
+          response.data
+        );
+        toast.error("Invalid coupon API response! Please try again.");
+        return;
+      }
+
+      // ✅ Dispatch applyCoupon with correct values
+      dispatch(
+        applyCoupon({
+          coupon: selectedCoupon,
+          discountAmount: updatedCart.discountAmount,
+          discountType: updatedCart.discountType || "percentage", // Default to percentage if not provided
+        })
+      );
+
+      // ✅ Force refresh cart after applying coupon
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      dispatch(fetchCart());
+
       toast.success("Coupon applied successfully!");
     } catch (error) {
-      console.error("Error applying coupon:", error);
-      toast.error("Error applying coupon!");
+      console.error(
+        "Error applying coupon:",
+        error.response?.data || error.message
+      );
+      toast.error("Error applying coupon! Please try again.");
     }
   };
-
-  
+  useEffect(() => {
+    console.log("Cart Updated:", cart); // ✅ Debugging line
+  }, [cart]);
   const handleProceedToCheckout = async () => {
     try {
       await axiosInstance.post("/cart/checkout", { cartId: cart?.cartId });
@@ -143,9 +182,14 @@ const Cart = () => {
   };
 
   if (!cart || !Array.isArray(cart.cartItems)) {
+    console.warn("🚨 Invalid cart state. Not rendering UI.", cart);
     return <p className="text-center text-gray-600">Loading cart...</p>;
   }
 
+  if (cart.cartItems.length === 0) {
+    console.warn("🛒 Cart is empty in state but should contain items!", cart);
+    return <p className="text-center text-gray-600">Your cart is empty. 🛒</p>;
+  }
   return (
     <div className="container mx-auto p-6">
       <ToastContainer />
@@ -162,7 +206,7 @@ const Cart = () => {
               />
               <div className="ml-4 flex-1">
                 <h3 className="text-lg">{item.name}</h3>
-                <p className="text-gray-500">${item.price?.toFixed(2)}</p>
+                <p className="text-gray-500">Rs:{item.price?.toFixed(2)}</p>
 
                 <div className="flex mt-2">
                   <button
@@ -195,7 +239,7 @@ const Cart = () => {
           ))}
 
           <h3 className="text-xl font-bold mt-4">
-            💰 Total: ${cart.totalAmount?.toFixed(2)}
+            Total: Rs:{cart.totalAmount?.toFixed(2)}
           </h3>
 
           <div className="mt-4 flex">
