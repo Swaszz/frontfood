@@ -2,34 +2,41 @@ import { useForm } from "react-hook-form";
 import axiosInstance from "../../config/axiosInstance";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { saveUser } from "../../redux/features/userSlice";
+import { saveOwner } from "../../redux/features/OwnerSlice";
 import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
 
 function Signup() {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
-
-  location.pathname.includes("restaurantowner") ||
-  location.pathname.includes("admin")
-    ? "restaurantowner"
-    : "user";
-
+  const dispatch = useDispatch();
+  const role =
+    location.pathname.includes("restaurantowner") ||
+    location.pathname.includes("admin")
+      ? "restaurantowner"
+      : "user";
   const onSubmit = async (data) => {
     try {
       let endpoint = "/user/signup";
 
       if (role === "restaurantowner" || role === "admin") {
-        endpoint = "/restaurantowner/signup"; // Shared endpoint for restaurant owners & admins
-        data.role = data.role === "admin" ? "admin" : "restaurantOwner"; // ✅ Convert to correct format
+        endpoint = "/restaurantowner/signup";
+        data.role = data.role === "admin" ? "admin" : "restaurantOwner";
       }
 
-      console.log("🚀 Sending Signup Request:", { endpoint, data });
+      console.log(" Sending Signup Request:", { endpoint, data });
 
       const response = await axiosInstance.post(endpoint, data);
-      console.log("✅ Signup Response:", response);
+      console.log("Signup Response:", response);
 
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      if (role === "restaurantowner") {
+        localStorage.setItem("ownerToken", response?.data?.token);
+        dispatch(saveOwner(response?.data?.data));
+      } else {
+        localStorage.setItem("userToken", response?.data?.token);
+        dispatch(saveUser(response?.data?.data));
       }
 
       toast.success("Signup Successful! Redirecting...", {
@@ -40,24 +47,18 @@ function Signup() {
       setTimeout(() => {
         if (role === "restaurantowner") {
           navigate("/restaurantowner/");
-        } else if (role === "admin") {
-          navigate("/restaurantowner/");
         } else {
           navigate("/");
         }
       }, 2500);
     } catch (error) {
-      console.error("❌ Signup Failed:", error.response?.data || error.message);
+      console.error("Signup Failed:", error.response?.data || error.message);
       toast.error(
         error.response?.data?.message || "Signup Failed! Please try again.",
-        {
-          position: "top-center",
-          autoClose: 3000,
-        }
+        { position: "top-center", autoClose: 3000 }
       );
     }
   };
-
   return (
     <div className="hero min-h-[80vh] bg-base-200 flex justify-center items-center py-12">
       <ToastContainer />
@@ -151,7 +152,20 @@ function Signup() {
               />
             </div>
           )}
-
+          <div className="form-control">
+            <label className="label">
+              <Link
+                to={
+                  role === "restaurantowner"
+                    ? "/restaurantowner/login"
+                    : "/login"
+                }
+                className="label-text-alt link link-hover"
+              >
+                Existing User? Login Here
+              </Link>
+            </label>
+          </div>
           {/* Submit Button */}
           <div className="form-control mt-4">
             <button className="btn btn-primary w-full">Signup</button>

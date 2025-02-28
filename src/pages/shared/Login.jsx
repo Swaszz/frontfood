@@ -1,38 +1,46 @@
-import "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "../../config/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearUser, saveUser } from "../../redux/features/userSlice";
+import { clearOwner, saveOwner } from "../../redux/features/OwnerSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Login = ({ role }) => {
+const Login = ({ role = "user" }) => {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const user = {
-    role: "user",
-    loginAPI: "/user/login",
-    profileRoute: "/user/profile",
-    signupRoute: "/signup",
-  };
+  const roleType = role === "restaurantowner" ? "restaurantowner" : "user";
 
-  if (role === "restaurantowner") {
-    user.role = "restaurantowner";
-    user.loginAPI = "/restaurantowner/login";
-    user.profileRoute = "/restaurantowner/profile";
-    user.signupRoute = "/restaurantowner/signup";
-  }
+  const user = {
+    role: roleType,
+    loginAPI:
+      roleType === "restaurantowner" ? "/restaurantowner/login" : "/user/login",
+    profileRoute:
+      roleType === "restaurantowner"
+        ? "/restaurantowner/profile"
+        : "/user/profile",
+    signupRoute:
+      roleType === "restaurantowner" ? "/restaurantowner/signup" : "/signup",
+  };
 
   const onSubmit = async (data) => {
     try {
+      console.log("Login Request:", { endpoint: user.loginAPI, data });
+
       const response = await axiosInstance.put(user.loginAPI, data);
+      console.log("Login Successful:", response.data);
 
-      localStorage.setItem("token", response?.data?.token);
-
-      dispatch(saveUser(response?.data?.data));
+      if (user.role === "restaurantowner") {
+        localStorage.setItem("ownerToken", response?.data?.token);
+        dispatch(saveOwner(response?.data?.data));
+      } else {
+        localStorage.setItem("userToken", response?.data?.token);
+        dispatch(saveUser(response?.data?.data));
+      }
 
       toast.success("Login Successful! Redirecting...", {
         position: "top-center",
@@ -40,11 +48,19 @@ const Login = ({ role }) => {
 
       setTimeout(() => navigate(user.profileRoute), 2500);
     } catch (error) {
-      console.log(error);
-      dispatch(clearUser());
-      toast.error("Login Failed! Please check your credentials.", {
-        position: "top-center",
-      });
+      console.error("Login Failed:", error.response?.data || error.message);
+
+      if (user.role === "restaurantowner") {
+        dispatch(clearOwner());
+      } else {
+        dispatch(clearUser());
+      }
+
+      toast.error(
+        error.response?.data?.message ||
+          "Login Failed! Please check your credentials.",
+        { position: "top-center" }
+      );
     }
   };
 

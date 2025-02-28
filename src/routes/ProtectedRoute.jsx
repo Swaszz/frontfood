@@ -25,10 +25,9 @@ function ProtectedRoute({ role, children }) {
     console.log(
       `User Auth: ${isUserAuth}, Owner Auth: ${isOwnerAuth}, Admin Auth: ${isAdminAuth}`
     );
-
     if (!isAuthenticated) {
-      console.log(`Unauthorized - Redirecting to /${role}/login`);
-      navigate(`/${role}/login`);
+      console.warn("Unauthorized - Redirecting to /login");
+      navigate("/login");
     } else {
       setIsChecked(true);
     }

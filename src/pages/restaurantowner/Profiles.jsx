@@ -22,6 +22,7 @@ function Profiles() {
         address: profileData?.address || "",
         phone: profileData?.phone || "",
         profilePic: profileData?.profilePic || "",
+        role: profileData?.role || "",
         password: "",
       });
     }
@@ -44,7 +45,7 @@ function Profiles() {
           },
         });
 
-        console.log("✅ Profile Data Fetched:", response.data);
+        console.log(" Profile Data Fetched:", response.data);
         setProfileData(response.data.data);
       } catch (err) {
         console.error(" Error Fetching Profile:", err);
@@ -177,6 +178,22 @@ function Profiles() {
                 />
               ) : (
                 <p className="text-lg font-medium">{formData.address}</p>
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="text-gray-700 dark:text-gray-300 font-semibold">
+                role:
+              </label>
+              {editMode ? (
+                <input
+                  type="text"
+                  name="role"
+                  className="input input-bordered w-full dark:bg-gray-700"
+                  value={formData.role}
+                  onChange={handleChange}
+                />
+              ) : (
+                <p className="text-lg font-medium">{formData.role}</p>
               )}
             </div>
 

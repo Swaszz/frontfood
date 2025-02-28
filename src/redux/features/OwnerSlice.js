@@ -1,8 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const storedOwnerData = localStorage.getItem("ownerData") || ""; 
+const isOwnerAuthenticated = storedOwnerData.length > 0; 
+
 const initialState = {
-  isOwnerAuth: false,
-  ownerData: null,
+  isOwnerAuth: isOwnerAuthenticated,
+  ownerData: storedOwnerData,
 };
 
 const ownerSlice = createSlice({
@@ -12,10 +15,13 @@ const ownerSlice = createSlice({
     saveOwner: (state, action) => {
       state.isOwnerAuth = true;
       state.ownerData = action.payload;
+      localStorage.setItem("ownerData", action.payload); 
     },
     clearOwner: (state) => {
       state.isOwnerAuth = false;
-      state.ownerData = null;
+      state.ownerData = "";
+      localStorage.removeItem("ownerData");
+      localStorage.removeItem("ownerToken");
     },
   },
 });

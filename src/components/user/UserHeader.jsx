@@ -179,7 +179,7 @@ function UserHeader() {
             </li>
             <li
               className="hover:text-blue-600 cursor-pointer"
-              onClick={() => navigate("/user/login")}
+              onClick={() => navigate("/login")}
             >
               Login
             </li>

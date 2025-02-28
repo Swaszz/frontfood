@@ -49,14 +49,16 @@ function Profile() {
 
   const handleLogOut = async () => {
     try {
-      const response = await axiosInstance.get("/user/logout");
-      if (response.status === 200) {
-        localStorage.removeItem("token");
-        dispatch(clearUser());
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 200);
-      }
+      console.log(" Logging out...");
+
+      await axiosInstance.get("/user/logout");
+
+      localStorage.removeItem("token");
+      await dispatch(clearUser());
+
+      console.log("Successfully logged out, navigating to /login...");
+
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
     }
