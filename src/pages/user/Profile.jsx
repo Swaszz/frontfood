@@ -66,6 +66,7 @@ function Profile() {
         localStorage.removeItem("userToken");
         localStorage.removeItem("userData");
 
+        sessionStorage.clear();
         console.log("Navigating to login...");
 
         // Ensure Redux state updates before redirecting
