@@ -49,18 +49,32 @@ function Profile() {
 
   const handleLogOut = async () => {
     try {
-      console.log(" Logging out...");
+      console.log("Logging out...");
 
-      await axiosInstance.get("/user/logout", { withCredentials: true });
-      dispatch(clearUser());
-      localStorage.removeItem("userToken");
-      localStorage.removeItem("userData");
-      // Delay navigation slightly to ensure Redux state updates
-      setTimeout(() => {
-        window.location.href = "/login"; // Full page reload ensures proper state reset
-      }, 200);
+      // Call API to log out
+      const response = await axiosInstance.get("/user/logout", {
+        withCredentials: true,
+      });
 
-      //  navigate("/", { replace: true });
+      if (response.status === 200) {
+        console.log("User successfully logged out.");
+
+        // Clear Redux state first
+        dispatch(clearUser());
+
+        // Remove user data from local storage
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("userData");
+
+        console.log("Navigating to login...");
+
+        // Ensure Redux state updates before redirecting
+        setTimeout(() => {
+          window.location.href = "/login"; // Full reload ensures state reset
+        }, 100);
+      } else {
+        console.error("Unexpected logout response:", response);
+      }
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
     }
