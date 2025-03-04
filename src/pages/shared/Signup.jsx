@@ -12,26 +12,33 @@ function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const role =
-    location.pathname.includes("restaurantowner") ||
-    location.pathname.includes("admin")
-      ? "restaurantowner"
-      : "user";
+
+  const role = location.pathname.includes("restaurantowner")
+    ? "restaurantowner"
+    : location.pathname.includes("admin")
+    ? "admin"
+    : "user";
+
+  const signupAPI =
+    role === "restaurantowner" || role === "admin"
+      ? "/restaurantowner/signup"
+      : "/user/signup";
   const onSubmit = async (data) => {
     try {
-      let endpoint = "/user/signup";
-
-      if (role === "restaurantowner" || role === "admin") {
-        endpoint = "/restaurantowner/signup";
-        data.role = data.role === "admin" ? "admin" : "restaurantOwner";
+      if (role === "restaurantowner") {
+        data.role = "restaurantOwner";
+      } else if (role === "admin") {
+        data.role = "admin";
+      } else {
+        data.role = "user";
       }
 
-      console.log(" Sending Signup Request:", { endpoint, data });
+      console.log("Sending Signup Request:", { signupAPI, data });
 
-      const response = await axiosInstance.post(endpoint, data);
+      const response = await axiosInstance.post(signupAPI, data);
       console.log("Signup Response:", response);
 
-      if (role === "restaurantowner") {
+      if (role === "restaurantowner" || role === "admin") {
         localStorage.setItem("ownerToken", response?.data?.token);
         dispatch(saveOwner(response?.data?.data));
       } else {
@@ -45,11 +52,7 @@ function Signup() {
       });
 
       setTimeout(() => {
-        if (role === "restaurantowner") {
-          navigate("/restaurantowner/");
-        } else {
-          navigate("/");
-        }
+        navigate(role === "restaurantowner" ? "/restaurantowner/" : "/");
       }, 2500);
     } catch (error) {
       console.error("Signup Failed:", error.response?.data || error.message);
@@ -67,7 +70,6 @@ function Signup() {
         <h1 className="text-4xl font-bold text-center mb-6">Signup Now!</h1>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          {/* Name */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Name</span>
@@ -81,7 +83,6 @@ function Signup() {
             />
           </div>
 
-          {/* Address */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Address</span>
@@ -95,7 +96,6 @@ function Signup() {
             />
           </div>
 
-          {/* Phone */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Phone</span>
@@ -109,7 +109,6 @@ function Signup() {
             />
           </div>
 
-          {/* Email */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Email</span>
@@ -123,7 +122,6 @@ function Signup() {
             />
           </div>
 
-          {/* Password */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Password</span>
@@ -137,19 +135,19 @@ function Signup() {
             />
           </div>
 
-          {/* ✅ Role Field for Restaurant Owners & Admins */}
-          {role === "restaurantowner" && (
+          {(role === "restaurantowner" || role === "admin") && (
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Role</span>
               </label>
-              <input
-                type="text"
-                placeholder="Enter your role (e.g., restaurantOwner, admin)"
+              <select
                 {...register("role")}
-                className="input input-bordered w-full"
+                className="select select-bordered w-full"
                 required
-              />
+              >
+                <option value="restaurantOwner">Restaurant Owner</option>{" "}
+                <option value="admin">Admin</option>
+              </select>
             </div>
           )}
           <div className="form-control">
@@ -166,7 +164,7 @@ function Signup() {
               </Link>
             </label>
           </div>
-          {/* Submit Button */}
+
           <div className="form-control mt-4">
             <button className="btn btn-primary w-full">Signup</button>
           </div>

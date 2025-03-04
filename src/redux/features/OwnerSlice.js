@@ -13,6 +13,7 @@ const ownerSlice = createSlice({
   initialState,
   reducers: {
     saveOwner: (state, action) => {
+      if (localStorage.getItem("userToken")) return;
       state.isOwnerAuth = true;
       state.ownerData = action.payload;
       localStorage.setItem("ownerData", action.payload); 

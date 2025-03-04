@@ -13,6 +13,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     saveUser: (state, action) => {
+      if (localStorage.getItem("ownerToken")) return;
       state.isUserAuth = true;
       state.userData = action.payload;
       localStorage.setItem("userData", action.payload);
@@ -22,7 +23,7 @@ export const userSlice = createSlice({
       state.isUserAuth = false;
       state.userData = null; 
       localStorage.removeItem("userData"); 
-      localStorage.removeItem("token"); 
+      localStorage.removeItem("userToken"); 
     },
 
     setUser: (state, action) => {
