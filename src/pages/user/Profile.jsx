@@ -59,7 +59,7 @@ function Profile() {
 
       console.log("Successfully logged out, navigating to /login...");
 
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
     }
