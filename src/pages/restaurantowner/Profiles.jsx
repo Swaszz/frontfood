@@ -91,6 +91,7 @@ function Profiles() {
       const response = await axiosInstance.get("/restaurantowner/logout");
       if (response.status === 200) {
         localStorage.removeItem("ownerToken");
+        localStorage.removeItem("ownerData");
         dispatch(clearUser());
 
         setTimeout(() => {

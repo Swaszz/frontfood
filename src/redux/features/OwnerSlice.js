@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const storedOwnerData = localStorage.getItem("ownerData") || ""; 
-const isOwnerAuthenticated = storedOwnerData.length > 0; 
+const isOwnerAuthenticated = storedOwnerData ? true : false;
 
 const initialState = {
   isOwnerAuth: isOwnerAuthenticated,
