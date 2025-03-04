@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import useFetch from "../../hooks/useFetch";
-import { useDispatch } from "react-redux";
-import { clearUser } from "../../redux/features/userSlice";
+//import { useDispatch } from "react-redux";
+//import { clearUser } from "../../redux/features/userSlice";
 import axiosInstance from "../../config/axiosInstance";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 
 function Profile() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const dispatch = useDispatch();
+  //  const navigate = useNavigate();
   const [profileData, setProfileData] = useFetch("/user/profile");
   const [formData, setFormData] = useState({});
   const [editMode, setEditMode] = useState(false);
