@@ -13,9 +13,19 @@ function ProtectedRoute({ role, children }) {
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
+    const storedUserData = localStorage.getItem("userData");
+
+    // Ensure logout state is respected
+    if (!storedUserData) {
+      console.warn("User is not authenticated - Redirecting to /login");
+      navigate("/login", { replace: true });
+    }
+  });
+  useEffect(() => {
     if (isUserAuth === null || isOwnerAuth === null || isAdminAuth === null) {
       return;
     }
+
     const isAuthenticated =
       (role === "user" && isUserAuth) ||
       (role === "restaurantowner" && isOwnerAuth) ||

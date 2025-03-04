@@ -22,8 +22,7 @@ export const userSlice = createSlice({
     clearUser: (state) => {
       state.isUserAuth = false;
       state.userData = null; 
-      localStorage.removeItem("userData"); 
-      localStorage.removeItem("userToken"); 
+      localStorage.clear();
     },
 
     setUser: (state, action) => {
@@ -47,8 +46,7 @@ export const userSlice = createSlice({
     logoutUser: (state) => {
       state.isUserAuth = false;
       state.userData = null;
-      localStorage.removeItem("userData");  
-    localStorage.removeItem("userToken");     
+      localStorage.clear();
     },
   },
 });

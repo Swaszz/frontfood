@@ -53,13 +53,15 @@ function Profile() {
 
       await axiosInstance.get("/user/logout");
 
-      localStorage.removeItem("userToken");
-      localStorage.removeItem("userData");
+      localStorage.clear();
       dispatch(clearUser());
-      window.location.href = "/login";
-      console.log("Successfully logged out, navigating to /login...");
 
-    //  navigate("/", { replace: true });
+      // Delay navigation slightly to ensure Redux state updates
+      setTimeout(() => {
+        window.location.href = "/login"; // Full page reload ensures proper state reset
+      }, 200);
+
+      //  navigate("/", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
     }
