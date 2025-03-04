@@ -11,8 +11,8 @@ function ProtectedRoute({ role, children }) {
 
   useEffect(() => {
     // Ensure localStorage matches Redux state
-    const storedUserData = JSON.parse(localStorage.getItem("userData"));
-    const storedOwnerData = JSON.parse(localStorage.getItem("ownerData"));
+    const storedUserData = localStorage.getItem("userData");
+    const storedOwnerData = localStorage.getItem("ownerData");
 
     const isAuthenticated =
       (role === "user" && isUserAuth && storedUserData) ||
