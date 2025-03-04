@@ -51,11 +51,10 @@ function Profile() {
     try {
       console.log(" Logging out...");
 
-      await axiosInstance.get("/user/logout");
-
-      localStorage.clear();
+      await axiosInstance.get("/user/logout", { withCredentials: true });
       dispatch(clearUser());
-
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("userData");
       // Delay navigation slightly to ensure Redux state updates
       setTimeout(() => {
         window.location.href = "/login"; // Full page reload ensures proper state reset
