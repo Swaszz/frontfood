@@ -46,31 +46,14 @@ function Profile() {
     }
     setLoading(false);
   };
-
   const handleLogOut = async () => {
     try {
-      console.log("Logging out...");
-
-      const response = await axiosInstance.get("/user/logout", {
-        withCredentials: true,
+      const response = await axiosInstance({
+        method: "GET",
+        url: "/user/logout",
       });
-
-      if (response.status === 200) {
-        console.log("User successfully logged out.");
-
-        dispatch(clearUser());
-
-        localStorage.removeItem("userToken");
-        localStorage.removeItem("userData");
-
-        sessionStorage.clear();
-
-        navigate("/login", { replace: true });
-      } else {
-        console.error("Unexpected logout response:", response);
-      }
     } catch (error) {
-      console.error("Logout failed:", error.response?.data || error.message);
+      console.log(error);
     }
   };
 
