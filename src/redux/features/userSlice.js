@@ -42,6 +42,7 @@ export const userSlice = createSlice({
       state.userData = null; 
       localStorage.removeItem("userData");
       localStorage.removeItem("userToken");
+      sessionStorage.clear();
     },
 
     logoutUser: (state) => {
@@ -49,6 +50,7 @@ export const userSlice = createSlice({
       state.userData = null;
       localStorage.removeItem("userData");
       localStorage.removeItem("userToken");
+      sessionStorage.clear();
     },
   },
 });
