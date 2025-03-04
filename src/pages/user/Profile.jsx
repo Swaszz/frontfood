@@ -53,7 +53,7 @@ function Profile() {
 
       await axiosInstance.get("/user/logout");
 
-      localStorage.removeItem("token");
+      localStorage.removeItem("userToken");
       localStorage.removeItem("userData");
       dispatch(clearUser());
 
