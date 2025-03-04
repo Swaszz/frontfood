@@ -6,8 +6,8 @@ function Paymentsuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("✅ Payment Success Page Loaded");
-  }, []); // ✅ Corrected useEffect syntax
+    console.log("Payment Success Page Loaded");
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-6">

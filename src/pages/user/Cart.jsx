@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../config/axiosInstance";
 import {
   setCart,
-  fetchCart,
+  //fetchCart,
   updateItemQuantity,
   removeItemFromCart,
   clearCart,

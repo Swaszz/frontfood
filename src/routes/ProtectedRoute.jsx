@@ -10,7 +10,6 @@ function ProtectedRoute({ role, children }) {
   const isAdminAuth = useSelector((state) => state.admin.isAdminAuth);
 
   useEffect(() => {
-    // Ensure localStorage matches Redux state
     const storedUserData = localStorage.getItem("userData");
     const storedOwnerData = localStorage.getItem("ownerData");
 
@@ -26,7 +25,7 @@ function ProtectedRoute({ role, children }) {
 
     if (!isAuthenticated) {
       console.warn("Unauthorized - Redirecting to login");
-      navigate("/login", { replace: true }); // Prevents back navigation to protected routes
+      navigate("/login", { replace: true });
     }
   }, [isUserAuth, isOwnerAuth, isAdminAuth, role, navigate]);
 

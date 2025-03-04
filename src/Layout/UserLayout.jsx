@@ -28,7 +28,7 @@ const UserLayout = () => {
       localStorage.setItem("isUserAuth", "true");
     } catch (error) {
       dispatch(clearUser());
-      localStorage.removeItem("isUserAuth");
+      localStorage.removeItem("userToken");
       console.log(error);
     }
   };

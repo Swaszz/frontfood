@@ -51,7 +51,6 @@ function Profile() {
     try {
       console.log("Logging out...");
 
-      // Call API to log out
       const response = await axiosInstance.get("/user/logout", {
         withCredentials: true,
       });
@@ -59,17 +58,16 @@ function Profile() {
       if (response.status === 200) {
         console.log("User successfully logged out.");
 
-        // Clear Redux state first
         dispatch(clearUser());
 
-        // Remove user data from local storage
         localStorage.removeItem("userToken");
         localStorage.removeItem("userData");
 
         sessionStorage.clear();
-        console.log("Navigating to login...");
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 200);
 
-        // Ensure Redux state updates before redirecting
         navigate("/login", { replace: true });
       } else {
         console.error("Unexpected logout response:", response);
