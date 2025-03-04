@@ -21,7 +21,7 @@ export const userSlice = createSlice({
 
     clearUser: (state) => {
       state.isUserAuth = false;
-      state.userData = null; 
+    //  state.userData = null; 
       localStorage.removeItem("userData");
       localStorage.removeItem("userToken");
     },

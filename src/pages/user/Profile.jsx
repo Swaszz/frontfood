@@ -69,9 +69,7 @@ function Profile() {
         console.log("Navigating to login...");
 
         // Ensure Redux state updates before redirecting
-        setTimeout(() => {
-          window.location.href = "/login"; // Full reload ensures state reset
-        }, 100);
+        navigate("/login", { replace: true });
       } else {
         console.error("Unexpected logout response:", response);
       }
