@@ -27,7 +27,8 @@ function ProtectedRoute({ role, children }) {
     );
     if (!isAuthenticated) {
       console.warn("Unauthorized - Redirecting to /login");
-      navigate("/login");
+      window.location.href = "/login";
+      //navigate("/login");
     } else {
       setIsChecked(true);
     }

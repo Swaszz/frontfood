@@ -56,10 +56,10 @@ function Profile() {
       localStorage.removeItem("userToken");
       localStorage.removeItem("userData");
       dispatch(clearUser());
-
+      window.location.href = "/login";
       console.log("Successfully logged out, navigating to /login...");
 
-      navigate("/", { replace: true });
+    //  navigate("/", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
     }
