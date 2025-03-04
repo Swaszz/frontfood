@@ -64,9 +64,6 @@ function Profile() {
         localStorage.removeItem("userData");
 
         sessionStorage.clear();
-        setTimeout(() => {
-          navigate("/login", { replace: true });
-        }, 200);
 
         navigate("/login", { replace: true });
       } else {
