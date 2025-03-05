@@ -53,6 +53,7 @@ function Profile() {
         method: "GET",
         url: "/user/logout",
       });
+      console.log(response);
     } catch (error) {
       console.log(error);
     }
