@@ -63,7 +63,7 @@ function Profile() {
         localStorage.removeItem("userData");
         sessionStorage.clear();
         document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          "userToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         navigate("/");
       } else {
         console.error("Unexpected logout response:", response);

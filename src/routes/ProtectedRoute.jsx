@@ -4,14 +4,12 @@ import { useSelector } from "react-redux";
 
 function ProtectedRoute({ role, children }) {
   const navigate = useNavigate();
-  const location = useLocation(); // Get current path
+  const location = useLocation();
 
-  // Fetch respective tokens
   const userToken = localStorage.getItem("userToken");
   const ownerToken = localStorage.getItem("ownerToken");
   const adminToken = localStorage.getItem("adminToken");
 
-  // Get authentication state from Redux
   const isUserAuth = useSelector((state) => state.user.isUserAuth);
   const isOwnerAuth = useSelector((state) => state.owner.isOwnerAuth);
   const isAdminAuth = useSelector((state) => state.admin?.isAdminAuth);
@@ -39,13 +37,9 @@ function ProtectedRoute({ role, children }) {
       `User Auth: ${isUserAuth}, Owner Auth: ${isOwnerAuth}, Admin Auth: ${isAdminAuth}`
     );
 
-    // ✅ FIX: Only redirect if NOT authenticated
     if (!isAuthenticated) {
-      navigate("/", { replace: true }); // Redirect to login if not authenticated
-    }
-
-    // ✅ FIX: Prevent redirect if user is already on the correct page
-    else if (location.pathname !== redirectPath) {
+      navigate("/", { replace: true });
+    } else if (location.pathname !== redirectPath) {
       navigate(redirectPath, { replace: true });
     }
   }, [
