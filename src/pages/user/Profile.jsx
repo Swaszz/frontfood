@@ -3,11 +3,11 @@ import useFetch from "../../hooks/useFetch";
 //import { useDispatch } from "react-redux";
 //import { clearUser } from "../../redux/features/userSlice";
 import axiosInstance from "../../config/axiosInstance";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
   // const dispatch = useDispatch();
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useFetch("/user/profile");
   const [formData, setFormData] = useState({});
   const [editMode, setEditMode] = useState(false);
@@ -54,6 +54,15 @@ function Profile() {
         url: "/user/logout",
       });
       console.log(response);
+
+      if (response.status === 200) {
+        // Clear authentication state (if stored in localStorage, sessionStorage, or context)
+        localStorage.removeItem("authToken");
+        sessionStorage.removeItem("authToken");
+
+        // Redirect to login page
+        navigate("/login");
+      }
     } catch (error) {
       console.log(error);
     }
