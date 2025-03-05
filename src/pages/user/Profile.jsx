@@ -57,8 +57,8 @@ function Profile() {
 
       if (response.status === 200) {
         // Clear authentication state (if stored in localStorage, sessionStorage, or context)
-        localStorage.removeItem("authToken");
-        sessionStorage.removeItem("authToken");
+        localStorage.removeItem("userToken");
+        sessionStorage.removeItem("userToken");
 
         // Redirect to login page
         navigate("/login");
