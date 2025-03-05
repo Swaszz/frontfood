@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import useFetch from "../../hooks/useFetch";
-//import { useDispatch } from "react-redux";
-//import { clearUser } from "../../redux/features/userSlice";
+import { useDispatch } from "react-redux";
+import { clearUser } from "../../redux/features/userSlice";
 import axiosInstance from "../../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 function Profile() {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [profileData, setProfileData] = useFetch("/user/profile");
   const [formData, setFormData] = useState({});
@@ -49,21 +49,28 @@ function Profile() {
 
   const handleLogOut = async () => {
     try {
-      const response = await axiosInstance({
-        method: "GET",
-        url: "/user/logout",
+      console.log("Logging out...");
+
+      const response = await axiosInstance.get("/user/logout", {
+        withCredentials: true,
       });
-      console.log(response);
 
       if (response.status === 200) {
-        // Clear authentication state (if stored in localStorage, sessionStorage, or context)
-        localStorage.removeItem("userToken");
-        sessionStorage.removeItem("userToken");
+        console.log("User successfully logged out.");
 
-        // Redirect to login page
+        dispatch(clearUser("userToken"));
+
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("userData");
+
+        sessionStorage.clear();
+
+        navigate("/login", { replace: true });
+      } else {
+        console.error("Unexpected logout response:", response);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Logout failed:", error.response?.data || error.message);
     }
   };
 
