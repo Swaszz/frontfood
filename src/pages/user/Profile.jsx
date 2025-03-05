@@ -7,7 +7,7 @@ import axiosInstance from "../../config/axiosInstance";
 
 function Profile() {
   // const dispatch = useDispatch();
-  //  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [profileData, setProfileData] = useFetch("/user/profile");
   const [formData, setFormData] = useState({});
   const [editMode, setEditMode] = useState(false);
@@ -46,13 +46,13 @@ function Profile() {
     }
     setLoading(false);
   };
+
   const handleLogOut = async () => {
     try {
       const response = await axiosInstance({
         method: "GET",
         url: "/user/logout",
       });
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
