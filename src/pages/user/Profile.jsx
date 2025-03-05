@@ -64,7 +64,9 @@ function Profile() {
         localStorage.removeItem("userData");
 
         sessionStorage.clear();
-        document.cookie = "token=; Path=/; Max-Age=0;";
+        document.cookie =
+          "token=; Path=/; Domain=food-order-cnsc.vercel.app; Max-Age=0;";
+
         navigate("/login", { replace: true });
       } else {
         console.error("Unexpected logout response:", response);
