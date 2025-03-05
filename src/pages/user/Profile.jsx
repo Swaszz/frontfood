@@ -58,7 +58,7 @@ function Profile() {
       if (response.status === 200) {
         console.log("User successfully logged out.");
 
-        localStorage.removeItem("userToken");
+        localStorage.removeItem("token");
         localStorage.removeItem("userData");
 
         navigate("/");

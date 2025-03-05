@@ -41,7 +41,7 @@ export const userSlice = createSlice({
       state.isUserAuth = false;
       state.userData = null; 
       localStorage.removeItem("userData");
-      localStorage.removeItem("userToken");
+      localStorage.removeItem("token");
       sessionStorage.clear();
     },
 
@@ -49,7 +49,7 @@ export const userSlice = createSlice({
       state.isUserAuth = false;
       state.userData = null;
       localStorage.removeItem("userData");
-      localStorage.removeItem("userToken");
+      localStorage.removeItem("token");
       sessionStorage.clear();
     },
   },
