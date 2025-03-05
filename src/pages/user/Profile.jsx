@@ -58,16 +58,10 @@ function Profile() {
       if (response.status === 200) {
         console.log("User successfully logged out.");
 
-        dispatch(clearUser());
-
         localStorage.removeItem("userToken");
         localStorage.removeItem("userData");
 
-        sessionStorage.clear();
-        document.cookie =
-          "token=; Path=/; Domain=food-order-cnsc.vercel.app; Max-Age=0;";
-
-        navigate("/login", { replace: true });
+        navigate("/");
       } else {
         console.error("Unexpected logout response:", response);
       }
