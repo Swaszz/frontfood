@@ -11,28 +11,40 @@ import SearchResults from "../components/shared/SearchResults";
 import ScrollToTop from "../components/ScrollToTop";
 const UserLayout = () => {
   const { isUserAuth, userData } = useSelector((state) => state.user);
-  console.log(userData);
+  console.log("User Data:", userData);
+
   const dispatch = useDispatch();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
+
   console.log("isUserAuth====", isUserAuth);
 
   const checkUser = async () => {
     try {
-      const response = await axiosInstance.get("/user/checkuser");
-      console.log(response);
+      const userToken = localStorage.getItem("userToken");
+
+      if (!userToken) {
+        console.log("No token found. Skipping checkUser API call.");
+        dispatch(clearUser());
+        return;
+      }
+
+      const response = await axiosInstance.get("/user/checkuser", {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+
+      console.log("Check User Response:", response);
       dispatch(saveUser(response.data));
-      localStorage.setItem("isUserAuth", "true");
     } catch (error) {
+      console.error("Error checking user:", error);
       dispatch(clearUser());
       localStorage.removeItem("userToken");
-      console.log(error);
     }
   };
-
   useEffect(() => {
     checkUser();
   }, [location.pathname, isUserAuth]);
