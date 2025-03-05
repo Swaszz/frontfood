@@ -1,25 +1,25 @@
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function ProtectedRoute({ role, children }) {
   const navigate = useNavigate();
+  const location = useLocation(); // Get current path
 
   // Fetch respective tokens
   const userToken = localStorage.getItem("userToken");
   const ownerToken = localStorage.getItem("ownerToken");
-  const adminToken = localStorage.getItem("adminToken"); // If applicable
+  const adminToken = localStorage.getItem("adminToken");
 
   // Get authentication state from Redux
   const isUserAuth = useSelector((state) => state.user.isUserAuth);
   const isOwnerAuth = useSelector((state) => state.owner.isOwnerAuth);
-  const isAdminAuth = useSelector((state) => state.admin?.isAdminAuth); // Optional for admin
+  const isAdminAuth = useSelector((state) => state.admin?.isAdminAuth);
 
   useEffect(() => {
     let isAuthenticated = false;
     let redirectPath = "/";
 
-    // Determine authentication based on role
     if (role === "user" && isUserAuth && userToken) {
       isAuthenticated = true;
       redirectPath = "/user/profile";
@@ -39,10 +39,14 @@ function ProtectedRoute({ role, children }) {
       `User Auth: ${isUserAuth}, Owner Auth: ${isOwnerAuth}, Admin Auth: ${isAdminAuth}`
     );
 
+    // ✅ FIX: Only redirect if NOT authenticated
     if (!isAuthenticated) {
       navigate("/", { replace: true }); // Redirect to login if not authenticated
-    } else {
-      navigate(redirectPath, { replace: true }); // Redirect authenticated users to their profile
+    }
+
+    // ✅ FIX: Prevent redirect if user is already on the correct page
+    else if (location.pathname !== redirectPath) {
+      navigate(redirectPath, { replace: true });
     }
   }, [
     isUserAuth,
@@ -53,6 +57,7 @@ function ProtectedRoute({ role, children }) {
     userToken,
     ownerToken,
     adminToken,
+    location.pathname,
   ]);
 
   return children ? children : <Outlet />;
