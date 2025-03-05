@@ -34,14 +34,14 @@ function Profiles() {
       setError("");
 
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        const ownerToken = localStorage.getItem("token");
+        if (!ownerToken) {
           throw new Error("No authentication token found");
         }
 
         const response = await axiosInstance.get("/restaurantowner/profile", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${ownerToken}`,
           },
         });
 
@@ -90,7 +90,7 @@ function Profiles() {
     try {
       const response = await axiosInstance.get("/restaurantowner/logout");
       if (response.status === 200) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("ownerToken");
         localStorage.removeItem("ownerData");
         dispatch(clearUser());
 

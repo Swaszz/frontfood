@@ -58,9 +58,10 @@ function Profile() {
       if (response.status === 200) {
         console.log("User successfully logged out.");
 
-        localStorage.removeItem("token");
+        dispatch(clearUser());
+        localStorage.removeItem("userToken");
         localStorage.removeItem("userData");
-
+        sessionStorage.clear();
         navigate("/");
       } else {
         console.error("Unexpected logout response:", response);
