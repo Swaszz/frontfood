@@ -26,7 +26,6 @@ const Login = ({ role = "user" }) => {
     signupRoute:
       roleType === "restaurantowner" ? "/restaurantowner/signup" : "/signup",
   };
-
   const onSubmit = async (data) => {
     try {
       console.log("Login Request:", { endpoint: user.loginAPI, data });
@@ -34,19 +33,26 @@ const Login = ({ role = "user" }) => {
       const response = await axiosInstance.put(user.loginAPI, data);
       console.log("Login Successful:", response.data);
 
+      const token = response?.data?.token;
+      const userData = response?.data?.data;
+
+      if (!token) {
+        throw new Error("No token received, login failed!");
+      }
+
       if (user.role === "restaurantowner") {
-        localStorage.setItem("ownerToken", response?.data?.token);
-        dispatch(saveOwner(response?.data?.data));
+        localStorage.setItem("ownerToken", token);
+        dispatch(saveOwner(userData));
       } else {
-        localStorage.setItem("userToken", response?.data?.token);
-        dispatch(saveUser(response?.data?.data));
+        localStorage.setItem("userToken", token);
+        dispatch(saveUser(userData));
       }
 
       toast.success("Login Successful! Redirecting...", {
         position: "top-center",
       });
 
-      setTimeout(() => navigate(user.profileRoute), 2500);
+      navigate(user.profileRoute, { replace: true });
     } catch (error) {
       console.error("Login Failed:", error.response?.data || error.message);
 
