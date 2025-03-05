@@ -61,7 +61,6 @@ function Profile() {
         sessionStorage.removeItem("userToken");
 
         // Redirect to login page
-        navigate("/login");
       }
     } catch (error) {
       console.log(error);
