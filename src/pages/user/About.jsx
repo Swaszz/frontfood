@@ -16,7 +16,7 @@ function About() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-        <div className="card bg-gray-900 shadow-xl p-6 border border-gray-700 rounded-xl">
+        <div className="card bg-black-900 shadow-xl p-6 border border-black-700 rounded-xl">
           <h2 className="text-2xl font-semibold text-secondary">Our Mission</h2>
           <p className="mt-2 text-gray-300">
             To make food delivery quick, convenient, and delightful for
@@ -24,7 +24,7 @@ function About() {
           </p>
         </div>
 
-        <div className="card bg-gray-900 shadow-xl p-6 border border-gray-700 rounded-xl">
+        <div className="card bg-black-900 shadow-xl p-6 border border-black-700 rounded-xl">
           <h2 className="text-2xl font-semibold text-secondary">
             Why Choose Us?
           </h2>
