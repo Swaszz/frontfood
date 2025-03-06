@@ -23,16 +23,27 @@ const OwnerLayout = () => {
 
   const checkOwner = async () => {
     try {
+      const ownerToken = localStorage.getItem("ownerToken");
+
+      if (!ownerToken) {
+        console.log("No token found. Skipping checkOwner API call.");
+        dispatch(clearOwner());
+        return;
+      }
+
       const response = await axiosInstance.get(
-        "/restaurantowner/checkrestaurantowner"
+        "/restaurantowner/checkrestaurantowner",
+        {
+          headers: { Authorization: `Bearer ${ownerToken}` },
+        }
       );
+
       console.log("Owner Authenticated:", response.data);
       dispatch(saveOwner(response.data));
-      localStorage.setItem("isOwnerAuth", "true");
     } catch (error) {
+      console.error("Owner Not Authenticated:", error);
       dispatch(clearOwner());
-      localStorage.removeItem("isOwnerAuth");
-      console.log("Owner Not Authenticated:", error);
+      localStorage.removeItem("ownerToken");
     }
   };
 

@@ -14,25 +14,31 @@ function About() {
           your doorstep.
         </p>
       </div>
+      <div
+        className={`p-6 rounded-xl shadow-lg border transition-all duration-300 ${
+          theme === "dark"
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-300"
+        }`}
+      >
+        <h2 className="text-2xl font-semibold text-primary">Our Mission</h2>
+        <p className="mt-2 text-base">
+          To make food delivery quick, convenient, and delightful for everyone.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-        <div className="card bg-black shadow-xl p-6 border border-neutral-800 rounded-xl">
-          <h2 className="text-2xl font-semibold text-primary">Our Mission</h2>
-          <p className="mt-2 text-base-content">
-            To make food delivery quick, convenient, and delightful for
-            everyone.
-          </p>
-        </div>
-
-        <div className="card bg-black shadow-xl p-6 border border-neutral-800 rounded-xl">
-          <h2 className="text-2xl font-semibold text-primary">
-            Why Choose Us?
-          </h2>
-          <p className="mt-2 text-base-content">
-            Fast delivery, wide restaurant selection, exclusive discounts, and
-            24/7 customer support.
-          </p>
-        </div>
+      <div
+        className={`p-6 rounded-xl shadow-lg border transition-all duration-300 ${
+          theme === "dark"
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-300"
+        }`}
+      >
+        <h2 className="text-2xl font-semibold text-primary">Why Choose Us?</h2>
+        <p className="mt-2 text-base">
+          Fast delivery, wide restaurant selection, exclusive discounts, and
+          24/7 customer support.
+        </p>
       </div>
     </div>
   );
