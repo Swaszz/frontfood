@@ -17,7 +17,7 @@ import ErrorPage from "../pages/shared/ErrorPage";
 import OwnerLayout from "../Layout/OwnerLayout";
 import Profiles from "../pages/restaurantowner/Profiles";
 import Ownerhome from "../pages/restaurantowner/Ownerhome";
-//import ScrollToTop from "../components/ScrollToTop";
+import ScrollToTop from "../components/ScrollToTop";
 import { Outlet } from "react-router-dom";
 import Menuitemform from "../pages/restaurantowner/Menuitemform";
 import Restaurantform from "../pages/restaurantowner/Restaurantform";
@@ -31,7 +31,7 @@ import ProductItems from "../pages/restaurantowner/Productitems";
 import UpdateMenuform from "../pages/restaurantowner/Updatemenuform";
 import Paymentsuccess from "../pages/user/Paymentsuccess";
 import Paymentcancel from "../pages/user/Paymentcancel";
-
+<ScrollToTop />;
 const router = createBrowserRouter([
   {
     path: "",

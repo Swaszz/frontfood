@@ -54,6 +54,7 @@ const OwnerLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
+
       {isOwnerAuth ? (
         <OwnerHeader onSearch={handleSearch} />
       ) : (
