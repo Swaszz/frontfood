@@ -44,14 +44,14 @@ const Cart = () => {
     const fetchCartData = async () => {
       try {
         const response = await axiosInstance.get("/cart/getcart");
-        console.log("🛠 Raw Cart API Response:", response.data);
+        console.log(" Raw Cart API Response:", response.data);
 
         if (!response.data || !response.data.data) {
           console.warn(" No cart data received. Not updating Redux.");
           return;
         }
 
-        console.log("🔹 Dispatching Redux Cart Update:", response.data.data);
+        console.log(" Dispatching Redux Cart Update:", response.data.data);
         dispatch(setCart(response.data.data));
       } catch (error) {
         console.error(" Error fetching cart:", error);

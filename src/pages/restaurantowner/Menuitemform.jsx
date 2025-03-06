@@ -82,7 +82,6 @@ function Menuitemform() {
       <ToastContainer />
 
       <div className="flex flex-col md:flex-row flex-grow transition-all duration-300">
-        {/* Sidebar */}
         <aside className="w-full md:w-1/4 p-6 bg-gray-900 text-white dark:bg-gray-800 shadow-lg">
           <h2 className="text-xl font-semibold mb-4">Manage</h2>
           <ul className="space-y-3">
@@ -105,7 +104,6 @@ function Menuitemform() {
           </ul>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-50 dark:bg-black transition-colors duration-300 flex justify-center items-center">
           <div className="w-full max-w-3xl bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-white">

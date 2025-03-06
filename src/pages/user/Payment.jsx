@@ -26,7 +26,7 @@ const Payment = () => {
   }, [locationOrder]);
   const fetchLatestOrder = async () => {
     try {
-      console.log("🔄 Fetching latest order...");
+      console.log(" Fetching latest order...");
       const response = await axiosInstance.get("/order/latest", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

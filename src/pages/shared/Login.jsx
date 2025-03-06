@@ -1,7 +1,7 @@
-import React from "react";
+import "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "../../config/axiosInstance";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearUser, saveUser } from "../../redux/features/userSlice";
 import { clearOwner, saveOwner } from "../../redux/features/OwnerSlice";
@@ -12,7 +12,9 @@ const Login = ({ role = "user" }) => {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
 
+  const isRestaurantOwnerLogin = location.pathname === "/restaurantowner/login";
   const roleType = role === "restaurantowner" ? "restaurantowner" : "user";
 
   const user = {
@@ -101,12 +103,15 @@ const Login = ({ role = "user" }) => {
             <a href="#" className="label-text-alt link link-hover">
               Forgot password?
             </a>
-            <Link
-              to={user.signupRoute}
-              className="label-text-alt link link-hover"
-            >
-              New User? Signup
-            </Link>
+
+            {!isRestaurantOwnerLogin && (
+              <Link
+                to={user.signupRoute}
+                className="label-text-alt link link-hover"
+              >
+                New User? Signup
+              </Link>
+            )}
           </div>
 
           <div className="form-control mt-4">
