@@ -83,10 +83,11 @@ function Couponform() {
     }
   };
   return (
-    <div className="flex flex-col md:flex-row h-screen transition-all duration-300">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-black transition-all duration-300">
       <ToastContainer />
 
-      <aside className="w-full md:w-1/4 p-6 bg-gray-900 text-white dark:bg-gray-800 shadow-lg">
+      {/* Sidebar - Fixed Height on Desktop */}
+      <aside className="w-full md:w-1/4 p-6 bg-gray-900 text-white dark:bg-gray-800 shadow-lg sticky top-0 md:h-screen">
         <h2 className="text-xl font-semibold mb-4">Manage</h2>
         <ul className="space-y-3">
           <li>
@@ -102,19 +103,21 @@ function Couponform() {
               to="/restaurantowner/createmenu"
               className="block hover:text-gray-400"
             >
-              Menuitem
+              Menu Item
             </Link>
           </li>
         </ul>
       </aside>
 
-      <main className="flex-1 p-6 bg-gray-50 dark:bg-black transition-colors duration-300">
+      {/* Main Content */}
+      <main className="flex-1 p-6 bg-gray-50 dark:bg-black transition-colors duration-300 min-h-screen">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-white">
           Manage Your Coupons
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg transition-all">
+          {/* Coupons List */}
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg transition-all overflow-auto">
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
               Your Coupons
             </h3>
@@ -167,6 +170,7 @@ function Couponform() {
             )}
           </div>
 
+          {/* Create/Edit Coupon Form */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg transition-all">
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
               {editMode ? "Edit Coupon" : "Create New Coupon"}

@@ -42,29 +42,35 @@ const Header = () => {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box shadow-md z-[10] mt-3 w-52 p-2"
           >
             <li className="block sm:hidden">
-              <button
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onClick={() => query.trim() && navigate(`/search/${query}`)}
-                className="flex items-center gap-2"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-1 w-full">
+                <input
+                  type="text"
+                  className="input input-sm border-none focus:outline-none w-full"
+                  placeholder="Search..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <button
+                  onClick={() => query.trim() && navigate(`/search/${query}`)}
+                  className="btn btn-sm btn-ghost"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <span>Search</span>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
             </li>
 
             <li className="block sm:hidden">
