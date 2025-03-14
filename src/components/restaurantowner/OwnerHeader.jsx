@@ -20,7 +20,7 @@ function OwnerHeader() {
           <button tabIndex={0} className="btn btn-ghost btn-circle">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-gray-700 hover:text-primary"
+              className="h-6 w-6 text-white-700 hover:text-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -54,6 +54,9 @@ function OwnerHeader() {
             </li>
             <li>
               <Link to={"/restaurantowner/createcoupon"}> COUPON</Link>
+            </li>
+            <li>
+              <Link to={"/restaurantowner/getUsers"}> USERS</Link>
             </li>
             <li>
               <DarkMode className="w-6 h-6" />

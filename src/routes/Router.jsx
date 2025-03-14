@@ -26,11 +26,12 @@ import Couponform from "../pages/restaurantowner/Couponform";
 import Categorypage from "../pages/user/Categorypage";
 import Categorypages from "../pages/restaurantowner/Categorypages";
 import Payment from "../pages/user/Payment";
-import Orderform from "../pages/restaurantowner/Orderform";
 import ProductItems from "../pages/restaurantowner/Productitems";
 import UpdateMenuform from "../pages/restaurantowner/Updatemenuform";
 import Paymentsuccess from "../pages/user/Paymentsuccess";
 import Paymentcancel from "../pages/user/Paymentcancel";
+import UsersList from "../pages/restaurantowner/UsersList";
+import UserOrders from "../pages/restaurantowner/UserOrders";
 <ScrollToTop />;
 const router = createBrowserRouter([
   {
@@ -194,10 +195,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "updateorder",
+        path: "getUsers",
         element: (
           <ProtectedRoute role="restaurantowner">
-            <Orderform />
+            <UsersList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "getUserOrders/:userId",
+        element: (
+          <ProtectedRoute role="restaurantowner">
+            <UserOrders />
           </ProtectedRoute>
         ),
       },
